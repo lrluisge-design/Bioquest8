@@ -1,0 +1,3082 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BioQuest 8° - Juego de Biologia Celular</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --primary: #6C63FF;
+    --secondary: #FF6B6B;
+    --accent: #4ECDC4;
+    --yellow: #FFE66D;
+    --green: #2ECC71;
+    --orange: #F39C12;
+    --dark: #2D3436;
+    --light: #F8F9FA;
+    --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg-gradient);
+    min-height: 100vh;
+    color: var(--dark);
+    overflow-x: hidden;
+  }
+
+  .app {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 10px;
+    min-height: 100vh;
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    text-align: center;
+    padding: 20px 10px;
+    color: white;
+  }
+  .header h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
+    text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+    margin-bottom: 5px;
+  }
+  .header p {
+    font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+    opacity: 0.9;
+  }
+
+  /* ===== SCORE BAR ===== */
+  .score-bar {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 10px 0;
+    flex-wrap: wrap;
+  }
+  .score-item {
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(10px);
+    padding: 8px 20px;
+    border-radius: 30px;
+    color: white;
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ===== CARDS / PANELS ===== */
+  .card {
+    background: white;
+    border-radius: 20px;
+    padding: 25px;
+    margin: 15px 0;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    animation: slideUp 0.4s ease;
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== MAIN MENU ===== */
+  .menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+  }
+  .menu-card {
+    background: white;
+    border-radius: 20px;
+    padding: 25px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    border: 3px solid transparent;
+  }
+  .menu-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+  }
+  .menu-card.mode1 { border-color: var(--primary); }
+  .menu-card.mode1:hover { background: #f0efff; }
+  .menu-card.mode2 { border-color: var(--accent); }
+  .menu-card.mode2:hover { background: #e8faf8; }
+  .menu-card.mode3 { border-color: var(--orange); }
+  .menu-card.mode3:hover { background: #fef5e7; }
+  .menu-card.mode4 { border-color: var(--secondary); }
+  .menu-card.mode4:hover { background: #ffe8e8; }
+  .menu-icon { font-size: 3rem; margin-bottom: 10px; }
+  .menu-card h3 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+  }
+  .menu-card p { font-size: 0.85rem; color: #666; }
+
+  /* ===== BUTTONS ===== */
+  .btn {
+    display: inline-block;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 50px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+  }
+  .btn:hover { transform: scale(1.05); }
+  .btn:active { transform: scale(0.95); }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-secondary { background: var(--secondary); color: white; }
+  .btn-accent { background: var(--accent); color: white; }
+  .btn-green { background: var(--green); color: white; }
+  .btn-orange { background: var(--orange); color: white; }
+  .btn-back {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    margin-bottom: 10px;
+    padding: 8px 20px;
+    font-size: 0.9rem;
+  }
+  .btn-back:hover { background: rgba(255,255,255,0.35); }
+
+  /* ===== TRIVIA ===== */
+  .trivia-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .question-counter {
+    font-weight: 800;
+    color: var(--primary);
+    font-size: 1rem;
+  }
+  .timer {
+    background: var(--secondary);
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    min-width: 50px;
+    text-align: center;
+  }
+  .timer.warning { animation: pulse 0.5s infinite; background: #e74c3c; }
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+
+  .question-text {
+    font-size: clamp(1rem, 3vw, 1.2rem);
+    font-weight: 700;
+    margin-bottom: 20px;
+    line-height: 1.5;
+    color: var(--dark);
+  }
+  .topic-tag {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: white;
+  }
+  .tag-organelos { background: var(--accent); }
+  .tag-ciclo { background: var(--orange); }
+  .tag-cancer { background: var(--secondary); }
+
+  .options-list { display: flex; flex-direction: column; gap: 10px; }
+  .option-btn {
+    width: 100%;
+    padding: 15px 20px;
+    border: 3px solid #e0e0e0;
+    border-radius: 15px;
+    background: white;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: left;
+    line-height: 1.4;
+  }
+  .option-btn:hover:not(.disabled) {
+    border-color: var(--primary);
+    background: #f0efff;
+    transform: translateX(5px);
+  }
+  .option-btn.correct {
+    border-color: var(--green);
+    background: #d5f5e3;
+    color: #1a7a3a;
+  }
+  .option-btn.incorrect {
+    border-color: var(--secondary);
+    background: #ffe8e8;
+    color: #c0392b;
+  }
+  .option-btn.disabled { pointer-events: none; opacity: 0.7; }
+
+  .feedback {
+    margin-top: 15px;
+    padding: 15px;
+    border-radius: 15px;
+    font-weight: 700;
+    text-align: center;
+    animation: slideUp 0.3s ease;
+  }
+  .feedback.correct { background: #d5f5e3; color: #1a7a3a; }
+  .feedback.incorrect { background: #ffe8e8; color: #c0392b; }
+  .feedback p { margin-bottom: 5px; }
+  .feedback .explanation {
+    font-weight: 400;
+    font-size: 0.9rem;
+    margin-top: 8px;
+  }
+
+  .progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e0e0e0;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 10px;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    transition: width 0.5s ease;
+  }
+
+  /* ===== ORGANELLE MATCH ===== */
+  .match-container { display: flex; flex-direction: column; gap: 15px; }
+  .match-instruction {
+    text-align: center;
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 1.05rem;
+    margin-bottom: 5px;
+  }
+  .match-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  @media (max-width: 500px) {
+    .match-grid { grid-template-columns: 1fr; }
+  }
+  .match-item {
+    padding: 12px 15px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    line-height: 1.3;
+    user-select: none;
+  }
+  .match-organelle {
+    background: #e8f4fd;
+    border: 2px solid #3498db;
+    color: #2c3e50;
+  }
+  .match-organelle.selected {
+    background: #3498db;
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(52,152,219,0.4);
+  }
+  .match-function {
+    background: #fef9e7;
+    border: 2px solid #f1c40f;
+    color: #2c3e50;
+  }
+  .match-function.selected {
+    background: #f1c40f;
+    color: white;
+    transform: scale(1.05);
+  }
+  .match-item.matched {
+    background: #d5f5e3 !important;
+    border-color: var(--green) !important;
+    color: #1a7a3a !important;
+    pointer-events: none;
+    opacity: 0.8;
+  }
+  .match-item.wrong {
+    animation: shake 0.4s ease;
+    border-color: var(--secondary) !important;
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+  }
+
+  /* ===== CYCLE SORT ===== */
+  .cycle-phases {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 15px 0;
+  }
+  .phase-slot {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 15px;
+    background: #f8f9fa;
+    border: 2px dashed #ccc;
+    border-radius: 12px;
+    min-height: 50px;
+    transition: all 0.3s ease;
+  }
+  .phase-slot.filled {
+    border-style: solid;
+    border-color: var(--primary);
+    background: #f0efff;
+  }
+  .phase-slot.correct-slot {
+    border-color: var(--green);
+    background: #d5f5e3;
+  }
+  .phase-slot.wrong-slot {
+    border-color: var(--secondary);
+    background: #ffe8e8;
+  }
+  .slot-number {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+  }
+  .phase-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 15px 0;
+    justify-content: center;
+  }
+  .phase-chip {
+    padding: 10px 18px;
+    border-radius: 25px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid;
+    user-select: none;
+  }
+  .phase-chip.available {
+    background: white;
+    border-color: var(--orange);
+    color: var(--orange);
+  }
+  .phase-chip.available:hover {
+    background: var(--orange);
+    color: white;
+  }
+  .phase-chip.placed {
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  /* ===== CANCER MODE ===== */
+  .cancer-scenario {
+    background: linear-gradient(135deg, #fff5f5, #ffe8e8);
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-left: 5px solid var(--secondary);
+  }
+  .cancer-scenario h3 {
+    color: var(--secondary);
+    margin-bottom: 8px;
+    font-size: 1.1rem;
+  }
+  .cancer-scenario p {
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+  .cancer-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 15px;
+  }
+  @media (max-width: 500px) {
+    .cancer-options { grid-template-columns: 1fr; }
+  }
+  .cancer-opt {
+    padding: 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    background: white;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    text-align: center;
+    font-family: 'Nunito', sans-serif;
+  }
+  .cancer-opt:hover:not(.disabled) {
+    border-color: var(--secondary);
+    background: #fff5f5;
+  }
+  .cancer-opt.correct { background: #d5f5e3; border-color: var(--green); color: #1a7a3a; }
+  .cancer-opt.incorrect { background: #ffe8e8; border-color: var(--secondary); color: #c0392b; }
+
+  /* ===== RESULTS ===== */
+  .results-card {
+    text-align: center;
+    padding: 30px 20px;
+  }
+  .results-icon { font-size: 4rem; margin-bottom: 15px; }
+  .results-score {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2.5rem;
+    color: var(--primary);
+    margin-bottom: 5px;
+  }
+  .results-msg {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 20px;
+  }
+  .results-stats {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+  .stat-box {
+    background: #f8f9fa;
+    padding: 15px 20px;
+    border-radius: 15px;
+    min-width: 100px;
+  }
+  .stat-box .num {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.8rem;
+    color: var(--primary);
+  }
+  .stat-box .label { font-size: 0.8rem; color: #888; }
+
+  .btn-group {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 15px;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 600px) {
+    .app { padding: 5px; }
+    .card { padding: 18px; margin: 10px 0; border-radius: 15px; }
+    .menu-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .menu-card { padding: 18px 12px; }
+    .menu-icon { font-size: 2.2rem; }
+  }
+
+  /* ===== CONFETTI ===== */
+  .confetti-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 999;
+    overflow: hidden;
+  }
+  .confetti-piece {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    top: -20px;
+    animation: confettiFall 3s ease-in forwards;
+  }
+  @keyframes confettiFall {
+    0% { top: -20px; opacity: 1; transform: rotate(0deg) translateX(0); }
+    100% { top: 110vh; opacity: 0; transform: rotate(720deg) translateX(100px); }
+  }
+
+  .selected-char {
+    border-color: var(--primary) !important;
+    background: #f0efff !important;
+    box-shadow: 0 0 0 3px rgba(108,99,255,0.2);
+  }
+
+  .hidden { display: none !important; }
+
+  /* ===== CELL DIAGRAM FOR MATCH MODE ===== */
+  .cell-visual {
+    text-align: center;
+    margin: 10px 0;
+    font-size: 0.85rem;
+    color: #888;
+    font-style: italic;
+  }
+
+  .round-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--primary);
+    color: white;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.85rem;
+  }
+
+  /* ===== REGISTER & REPORT STYLES ===== */
+  .register-card {
+    max-width: 500px;
+    margin: 20px auto;
+    text-align: center;
+  }
+
+  .report-card {
+    background: white;
+    border-radius: 15px;
+    padding: 18px;
+    margin-bottom: 12px;
+    border-left: 5px solid;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+  }
+
+  .rubric-level {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+
+  .rubric-bar {
+    background: #f0f0f0;
+    border-radius: 10px;
+    height: 12px;
+    overflow: hidden;
+    margin: 8px 0;
+  }
+
+  .rubric-bar-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 1s ease;
+  }
+
+  .level-inicial { background: #e74c3c; color: white; }
+  .level-basico { background: #f39c12; color: white; }
+  .level-aceptable { background: #27ae60; color: white; }
+  .level-sobresaliente { background: #2ecc71; color: white; }
+
+  .student-badge {
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(10px);
+    padding: 8px 20px;
+    border-radius: 30px;
+    color: white;
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .report-btn {
+    font-size: 1.1rem;
+    padding: 14px 35px;
+    animation: pulse 1.5s infinite;
+  }
+
+  .mode-check {
+    display: inline-block;
+    background: var(--green);
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 24px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+  }
+
+  @media print {
+    body { background: white !important; }
+    .btn, .btn-back { display: none !important; }
+    .app { max-width: 100%; }
+    .card { box-shadow: none; border: 1px solid #ddd; }
+  }
+
+</style>
+</head>
+<body>
+
+<div class="app" id="app"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" async></script>
+<script>
+// ========== GAME DATA ==========
+const triviaQuestions = [
+  // ORGANELOS
+  {
+    topic: "organelos",
+    question: "La membrana plasmatica esta compuesta principalmente por fosfolipidos y proteinas. Su modelo se conoce como:",
+    options: ["Mosaico fluido", "Doble helice", "Cadena continua", "Barrera rigida"],
+    correct: 0,
+    explanation: "El modelo de mosaico fluido describe la membrana como una estructura dinamica de fosfolipidos con proteinas incrustadas."
+  },
+  {
+    topic: "organelos",
+    question: "Cual es la funcion principal de la mitocondria?",
+    options: ["Sintesis de proteinas", "Produccion de ATP (energia)", "Digestion celular", "Almacenamiento de agua"],
+    correct: 1,
+    explanation: "Las mitocondrias son las 'centrales energeticas' de la celula, produciendo ATP mediante respiracion celular."
+  },
+  {
+    topic: "organelos",
+    question: "Los ribosomas son los encargados de:",
+    options: ["La digestion celular", "La sintesis de proteinas", "El almacenamiento de nutrientes", "La fotosintesis"],
+    correct: 1,
+    explanation: "Los ribosomas traducen el codigo genetico del ARN mensajero para sintetizar proteinas."
+  },
+  {
+    topic: "organelos",
+    question: "El aparato de Golgi funciona como:",
+    options: ["Central energetica", "Centro de almacenamiento de ADN", "Central de distribucion, clasificando y empaquetando proteinas", "Barrera selectiva"],
+    correct: 2,
+    explanation: "El aparato de Golgi modifica, clasifica y empaqueta proteinas y lipidos para su secrecion o uso interno."
+  },
+  {
+    topic: "organelos",
+    question: "Los lisosomas se conocen como los 'digestores' de la celula porque:",
+    options: ["Producen energia", "Contienen enzimas que descomponen desechos y material intracelular", "Sintetizan proteinas", "Realizan fotosintesis"],
+    correct: 1,
+    explanation: "Los lisosomas contienen enzimas digestivas que degradan desechos, material danado y particulas externas."
+  },
+  {
+    topic: "organelos",
+    question: "Los cloroplastos se encuentran exclusivamente en:",
+    options: ["Celulas animales", "Celulas vegetales", "Bacterias", "Hongos"],
+    correct: 1,
+    explanation: "Los cloroplastos son exclusivos de celulas vegetales y son la sede de la fotosintesis."
+  },
+  {
+    topic: "organelos",
+    question: "La pared celular se diferencia de la membrana plasmatica en que:",
+    options: ["Es semipermeable", "Es rigida y esta compuesta por celulosa", "Solo esta en celulas animales", "Es fluida"],
+    correct: 1,
+    explanation: "La pared celular es una estructura rigida de celulosa que da soporte y proteccion a las celulas vegetales."
+  },
+  {
+    topic: "organelos",
+    question: "El reticulo endoplasmatico rugoso se diferencia del liso porque:",
+    options: ["No tiene membranas", "Tiene ribosomas adheridos a su superficie", "Produce lipidos solamente", "Esta fuera de la celula"],
+    correct: 1,
+    explanation: "El RE rugoso tiene ribosomas en su superficie, lo que le permite participar en la sintesis de proteinas."
+  },
+  {
+    topic: "organelos",
+    question: "Las vacuolas son de gran tamano en las celulas vegetales y su funcion principal es:",
+    options: ["Producir energia", "Almacenar agua, nutrientes y desechos", "Sintetizar ADN", "Formar el huso mitotico"],
+    correct: 1,
+    explanation: "Las vacuolas almacenan agua, nutrientes y desechos, y mantienen la turgencia celular en plantas."
+  },
+  {
+    topic: "organelos",
+    question: "El centrosoma (con sus centriolos) es esencial para:",
+    options: ["La fotosintesis", "La division celular, formando el huso mitotico", "La digestion de proteinas", "El transporte de lipidos"],
+    correct: 1,
+    explanation: "Los centriolos organizan los microtubulos y forman el huso mitotico durante la division celular."
+  },
+  {
+    topic: "organelos",
+    question: "La membrana plasmatica es semipermeable, lo que significa que:",
+    options: ["No deja pasar nada", "Permite el paso de todas las sustancias", "Selecciona que sustancias pueden atravesarla", "Solo deja pasar agua"],
+    correct: 2,
+    explanation: "La membrana semipermeable permite el paso selectivo de sustancias segun su composicion quimica y tamano."
+  },
+  {
+    topic: "organelos",
+    question: "En la enfermedad de fibrosis quistica, el problema esta en:",
+    options: ["Las mitocondrias", "Un canal de cloro en la membrana plasmatica", "Los ribosomas", "El nucleo celular"],
+    correct: 1,
+    explanation: "La fibrosis quistica es causada por la mutacion del gen CFTR que afecta un canal de cloro en la membrana."
+  },
+
+  // CICLO CELULAR
+  {
+    topic: "ciclo",
+    question: "El ciclo celular se divide en dos grandes fases:",
+    options: ["Mitosis y meiosis", "Interfase y fase mitotica (M)", "Profase y telofase", "G1 y G2"],
+    correct: 1,
+    explanation: "El ciclo celular tiene dos fases principales: la interfase (preparacion) y la fase mitotica M (division)."
+  },
+  {
+    topic: "ciclo",
+    question: "Durante la fase S de la interfase ocurre:",
+    options: ["La division del citoplasma", "La duplicacion del ADN", "La separacion de cromosomas", "El crecimiento celular inicial"],
+    correct: 1,
+    explanation: "En la fase S (sintesis) se replica el ADN, asegurando que cada celula hija reciba una copia completa."
+  },
+  {
+    topic: "ciclo",
+    question: "En la fase G1 de la interfase, la celula:",
+    options: ["Se divide en dos", "Crece, sintetiza proteinas y realiza funciones metabolicas", "Duplica su ADN", "Forma el huso mitotico"],
+    correct: 1,
+    explanation: "En G1 la celula crece en tamano y sintetiza proteinas esenciales para sus funciones."
+  },
+  {
+    topic: "ciclo",
+    question: "En que fase de la mitosis los cromosomas se alinean en el centro de la celula?",
+    options: ["Profase", "Metafase", "Anafase", "Telofase"],
+    correct: 1,
+    explanation: "En la metafase los cromosomas se alinean en la placa metafasica (centro de la celula)."
+  },
+  {
+    topic: "ciclo",
+    question: "Durante la anafase, lo que ocurre es:",
+    options: ["Los cromosomas se condensan", "Las cromatidas hermanas se separan hacia polos opuestos", "Se forma la envoltura nuclear", "El citoplasma se divide"],
+    correct: 1,
+    explanation: "En la anafase, los microtubulos del huso mitotico separan las cromatidas hacia los polos opuestos."
+  },
+  {
+    topic: "ciclo",
+    question: "La citocinesis es:",
+    options: ["La duplicacion del ADN", "La condensacion de cromosomas", "La division del citoplasma en dos celulas hijas", "La formacion del huso mitotico"],
+    correct: 2,
+    explanation: "La citocinesis es la division final del citoplasma que produce dos celulas hijas separadas."
+  },
+  {
+    topic: "ciclo",
+    question: "Si una celula entra en estado G0, significa que:",
+    options: ["Esta muerta", "Esta en reposo y deja de dividirse", "Esta en fase de sintesis", "Se esta dividiendo activamente"],
+    correct: 1,
+    explanation: "G0 es un estado de reposo donde la celula sale del ciclo celular y deja de dividirse."
+  },
+  {
+    topic: "ciclo",
+    question: "La fase G2 del ciclo celular se caracteriza por:",
+    options: ["La separacion de cromosomas", "Preparar componentes para la division y verificar el ADN", "La sintesis de ADN", "La formacion de gametos"],
+    correct: 1,
+    explanation: "En G2 la celula verifica que el ADN se haya replicado correctamente y prepara los componentes para la division."
+  },
+  {
+    topic: "ciclo",
+    question: "En la profase de la mitosis, uno de los eventos principales es:",
+    options: ["Las cromatidas se alinean en el ecuador", "Los cromosomas se condensan y la envoltura nuclear se desintegra", "El citoplasma se divide", "Se replica el ADN"],
+    correct: 1,
+    explanation: "En profase los cromosomas se condensan, se forma el huso mitotico y la envoltura nuclear comienza a desintegrarse."
+  },
+  {
+    topic: "ciclo",
+    question: "Los cromosomas diploides (2n) en humanos tienen:",
+    options: ["23 cromosomas", "46 cromosomas (23 pares)", "92 cromosomas", "12 cromosomas"],
+    correct: 1,
+    explanation: "Las celulas somaticas humanas son diploides con 46 cromosomas organizados en 23 pares."
+  },
+  {
+    topic: "ciclo",
+    question: "La proteina p53 cumple el papel de:",
+    options: ["Acelerar la division celular", "Detener el ciclo celular si detecta danos en el ADN", "Formar el huso mitotico", "Producir energia"],
+    correct: 1,
+    explanation: "La p53 es una proteina supresora de tumores que detiene el ciclo celular si hay alteraciones geneticas."
+  },
+
+  // CANCER
+  {
+    topic: "cancer",
+    question: "El cancer se caracteriza por:",
+    options: ["Division celular controlada", "Crecimiento descontrolado de celulas anormales", "Muerte celular programada", "Regeneracion rapida de tejidos"],
+    correct: 1,
+    explanation: "El cancer es un crecimiento descontrolado de celulas anormales que pueden formar tumores."
+  },
+  {
+    topic: "cancer",
+    question: "Cual de estos es un factor de riesgo EXTERNO del cancer?",
+    options: ["Mutaciones geneticas heredadas", "Envejecimiento natural", "Consumo de tabaco", "Predisposicion genetica"],
+    correct: 2,
+    explanation: "El tabaquismo es una de las principales causas externas del cancer, especialmente de pulmon."
+  },
+  {
+    topic: "cancer",
+    question: "El virus del papiloma humano (VPH) esta relacionado con:",
+    options: ["Cancer de pulmon", "Cancer cervical (de utero)", "Leucemia", "Cancer de prostata"],
+    correct: 1,
+    explanation: "El VPH es una causa importante del cancer cervical, por eso la vacunacion es clave en su prevencion."
+  },
+  {
+    topic: "cancer",
+    question: "Las mutaciones en los genes BRCA1 y BRCA2 aumentan el riesgo de:",
+    options: ["Cancer de pulmon", "Cancer de mama", "Cancer de estomago", "Leucemia"],
+    correct: 1,
+    explanation: "Las mutaciones en BRCA1 y BRCA2 son factores geneticos que aumentan significativamente el riesgo de cancer de mama."
+  },
+  {
+    topic: "cancer",
+    question: "Para prevenir el cancer de piel es importante:",
+    options: ["Tomar mucho sol", "Usar protector solar y evitar exposicion solar intensa", "Comer mucha sal", "Fumar moderadamente"],
+    correct: 1,
+    explanation: "La proteccion solar es fundamental para prevenir el cancer de piel, incluyendo el melanoma."
+  },
+  {
+    topic: "cancer",
+    question: "La bacteria Helicobacter pylori esta asociada con:",
+    options: ["Cancer de mama", "Cancer gastrico (de estomago)", "Cancer de pulmon", "Cancer de tiroides"],
+    correct: 1,
+    explanation: "H. pylori es un factor de riesgo importante para el cancer gastrico."
+  },
+  {
+    topic: "cancer",
+    question: "Una medida de prevencion contra el cancer de colon es:",
+    options: ["Dieta rica en grasas", "Sedentarismo", "Dieta rica en frutas, verduras y fibra", "Consumo excesivo de alcohol"],
+    correct: 2,
+    explanation: "Una dieta saludable rica en fibra, frutas y verduras ayuda a prevenir el cancer de colon."
+  },
+  {
+    topic: "cancer",
+    question: "La relacion entre el ciclo celular y el cancer es que:",
+    options: ["El cancer acelera el metabolismo normal", "En el cancer los puntos de control del ciclo celular fallan", "El cancer fortalece la membrana", "El cancer mejora la funcion de los lisosomas"],
+    correct: 1,
+    explanation: "Cuando los puntos de control del ciclo celular fallan, las celulas se dividen sin regulacion, produciendo tumores."
+  }
+];
+
+const organelleMatchData = [
+  {
+    round: 1,
+    title: "Organelos y sus funciones",
+    pairs: [
+      { organelle: "Mitocondria", func: "Central energetica: produce ATP", emoji: "⚡" },
+      { organelle: "Ribosoma", func: "Sintesis de proteinas", emoji: "🔬" },
+      { organelle: "Lisosoma", func: "Digestion celular de desechos", emoji: "♻️" },
+      { organelle: "Ap. de Golgi", func: "Clasifica y empaqueta proteinas", emoji: "📦" },
+    ]
+  },
+  {
+    round: 2,
+    title: "Mas organelos y funciones",
+    pairs: [
+      { organelle: "Cloroplasto", func: "Fotosintesis: produce glucosa", emoji: "🌿" },
+      { organelle: "Vacuola", func: "Almacena agua y nutrientes", emoji: "💧" },
+      { organelle: "RE Rugoso", func: "Sintesis de proteinas con ribosomas", emoji: "🏭" },
+      { organelle: "Centriolos", func: "Forman el huso mitotico", emoji: "🧬" },
+    ]
+  },
+  {
+    round: 3,
+    title: "Estructuras celulares",
+    pairs: [
+      { organelle: "Membrana plasmatica", func: "Barrera selectiva semipermeable", emoji: "🛡️" },
+      { organelle: "Pared celular", func: "Soporte rigido de celulosa", emoji: "🧱" },
+      { organelle: "Nucleo", func: "Centro de control con ADN", emoji: "🧠" },
+      { organelle: "RE Liso", func: "Sintesis de lipidos", emoji: "🫧" },
+    ]
+  }
+];
+
+const cyclePhases = [
+  { name: "G1 (Gap 1)", desc: "Crecimiento celular y sintesis de proteinas", color: "#3498db",
+    chars: ["La celula crece en tamano y sintetiza proteinas esenciales", "Se evalua si las condiciones son adecuadas para continuar el ciclo"] },
+  { name: "S (Sintesis)", desc: "Duplicacion / replicacion del ADN", color: "#2ecc71",
+    chars: ["Cada cromosoma se replica formando dos cromatidas hermanas", "Se asegura que cada celula hija reciba una copia exacta del ADN"] },
+  { name: "G2 (Gap 2)", desc: "Preparacion para la division y verificacion del ADN", color: "#f39c12",
+    chars: ["La celula verifica que el ADN se haya replicado correctamente", "Se producen proteinas necesarias para la division celular"] },
+  { name: "Profase", desc: "Cromosomas se condensan, se forma huso mitotico", color: "#e74c3c",
+    chars: ["Los cromosomas se condensan y se hacen visibles al microscopio", "La envoltura nuclear comienza a desintegrarse"] },
+  { name: "Metafase", desc: "Cromosomas se alinean en el centro", color: "#9b59b6",
+    chars: ["Los cromosomas se alinean en la placa metafasica (centro de la celula)", "Los microtubulos del huso se adhieren a los cinetocoros de los cromosomas"] },
+  { name: "Anafase", desc: "Cromatidas se separan hacia los polos", color: "#e67e22",
+    chars: ["Las cromatidas hermanas se separan hacia polos opuestos", "La separacion es impulsada por los microtubulos del huso mitotico"] },
+  { name: "Telofase", desc: "Se reconstituye la envoltura nuclear", color: "#1abc9c",
+    chars: ["Los cromosomas se descondensan en cada polo", "Se reconstituye la envoltura nuclear alrededor de cada grupo de cromosomas"] },
+  { name: "Citocinesis", desc: "Division del citoplasma en dos celulas hijas", color: "#c0392b",
+    chars: ["El citoplasma se divide formando dos celulas hijas separadas", "En celulas animales se forma un surco de segmentacion; en vegetales, una placa celular"] },
+];
+
+const cancerScenarios = [
+  {
+    scenario: "Maria tiene 45 anos y le diagnosticaron cancer de mama. Su madre y abuela tambien lo padecieron.",
+    question: "Cual es el factor de riesgo mas probable en este caso?",
+    options: ["Exposicion al sol", "Predisposicion genetica (genes BRCA1/BRCA2)", "Consumo de tabaco", "Infeccion por VPH"],
+    correct: 1,
+    explanation: "Los antecedentes familiares y las mutaciones en BRCA1/BRCA2 son factores geneticos clave en cancer de mama."
+  },
+  {
+    scenario: "Carlos, de 60 anos, fumo durante 30 anos y ahora presenta tos persistente y dificultad para respirar.",
+    question: "Que tipo de cancer tiene mayor riesgo de desarrollar?",
+    options: ["Cancer de colon", "Cancer de pulmon", "Cancer de prostata", "Leucemia"],
+    correct: 1,
+    explanation: "El tabaquismo prolongado es la principal causa del cancer de pulmon."
+  },
+  {
+    scenario: "Ana trabaja al aire libre sin proteccion solar desde joven. Ha notado manchas oscuras irregulares en su piel.",
+    question: "Que medida de prevencion debio tomar Ana?",
+    options: ["Tomar mas agua", "Usar protector solar y ropa adecuada", "Comer mas frutas", "Hacer mas ejercicio"],
+    correct: 1,
+    explanation: "La proteccion solar es la principal medida preventiva contra el cancer de piel."
+  },
+  {
+    scenario: "En un laboratorio, se observa que las celulas de un tumor se dividen sin control. Al analizar, se descubre que la proteina p53 esta mutada.",
+    question: "Por que la mutacion de p53 causa division descontrolada?",
+    options: ["Porque p53 produce energia para la celula", "Porque p53 es un punto de control que detiene celulas danadas", "Porque p53 forma la membrana celular", "Porque p53 es parte del huso mitotico"],
+    correct: 1,
+    explanation: "La p53 es una proteina supresora de tumores; sin ella, las celulas con ADN danado no se detienen y siguen dividiendose."
+  },
+  {
+    scenario: "Don Jose tiene 65 anos, dieta alta en sal y alimentos ahumados. Le diagnosticaron cancer gastrico.",
+    question: "Ademas de la dieta, que otro factor pudo contribuir a su cancer?",
+    options: ["Infeccion por Helicobacter pylori", "Uso de protector solar", "Ejercicio intenso", "Vacuna contra VPH"],
+    correct: 0,
+    explanation: "H. pylori y la dieta con exceso de sal y ahumados son factores de riesgo clave para cancer gastrico."
+  },
+  {
+    scenario: "Una joven de 18 anos fue vacunada contra el VPH como parte del programa de salud publica.",
+    question: "Que tipo de cancer ayuda a prevenir esta vacuna?",
+    options: ["Cancer de mama", "Cancer cervical (de cuello uterino)", "Cancer de pulmon", "Cancer de tiroides"],
+    correct: 1,
+    explanation: "La vacuna contra VPH previene la infeccion que causa la mayoria de los casos de cancer cervical."
+  },
+  {
+    scenario: "En Costa Rica, el cancer de estomago tiene una de las tasas mas altas en hombres (16.56 por cada 100,000 habitantes).",
+    question: "Cual de estas acciones ayudaria a reducir esta tasa?",
+    options: ["Aumentar el consumo de sal", "Reducir consumo de sal, tratar H. pylori, no fumar", "Tomar mas sol", "Consumir mas alcohol"],
+    correct: 1,
+    explanation: "Reducir sal, tratar infecciones por H. pylori y no fumar son medidas clave de prevencion."
+  },
+  {
+    scenario: "Un estudiante investiga por que el higado es uno de los organos donde mas se desarrolla cancer. Descubre que la hepatitis B y C son factores importantes.",
+    question: "Que tipo de causa del cancer representan los virus de hepatitis?",
+    options: ["Causa genetica interna", "Causa ambiental: infeccion viral", "Causa por envejecimiento", "Causa por radiacion"],
+    correct: 1,
+    explanation: "Las infecciones virales como hepatitis B y C son causas externas que pueden provocar cancer de higado."
+  }
+];
+
+// ========== TEACHER LOGO ==========
+const TEACHER_LOGO_SVG = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 140" style="max-width:120px;height:auto;">
+  <defs>
+    <linearGradient id="lBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+    <linearGradient id="lGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e6b980"/>
+      <stop offset="50%" style="stop-color:#d4a56a"/>
+      <stop offset="100%" style="stop-color:#e6b980"/>
+    </linearGradient>
+    <linearGradient id="lLine" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:transparent"/>
+      <stop offset="30%" style="stop-color:#e6b980"/>
+      <stop offset="70%" style="stop-color:#e6b980"/>
+      <stop offset="100%" style="stop-color:transparent"/>
+    </linearGradient>
+  </defs>
+  <rect width="240" height="140" rx="12" fill="url(#lBg)"/>
+  <circle cx="120" cy="45" r="28" fill="none" stroke="url(#lGold)" stroke-width="1.5"/>
+  <circle cx="120" cy="45" r="23" fill="none" stroke="#e6b980" stroke-width="0.6" opacity="0.35"/>
+  <text x="120" y="53" text-anchor="middle" font-family="Georgia,serif" font-size="22" font-weight="bold" fill="url(#lGold)" letter-spacing="2">LG</text>
+  <text x="120" y="95" text-anchor="middle" font-family="Helvetica,Arial,sans-serif" font-size="8" font-weight="300" fill="#e6b980" letter-spacing="2" opacity="0.7">LUIS G. LÓPEZ R.</text>
+  <line x1="75" y1="105" x2="165" y2="105" stroke="url(#lLine)" stroke-width="0.5"/>
+</svg>`;
+
+const TEACHER_LOGO_MINI = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" style="width:40px;height:40px;">
+  <defs>
+    <linearGradient id="mBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+    <linearGradient id="mGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e6b980"/>
+      <stop offset="100%" style="stop-color:#d4a56a"/>
+    </linearGradient>
+  </defs>
+  <rect width="60" height="60" rx="12" fill="url(#mBg)"/>
+  <circle cx="30" cy="30" r="22" fill="none" stroke="url(#mGold)" stroke-width="1.5"/>
+  <text x="30" y="37" text-anchor="middle" font-family="Georgia,serif" font-size="18" font-weight="bold" fill="url(#mGold)" letter-spacing="1">LG</text>
+</svg>`;
+
+// ========== ACCESS CONTROL CONFIG ==========
+const ACCESS_CONFIG = {
+  code: 'celula2026',
+  startDate: '2026-04-07',  // Fecha inicio (YYYY-MM-DD) - cambiar segun necesidad
+  endDate: '2026-04-09',    // Fecha fin (YYYY-MM-DD) - cambiar segun necesidad
+  enabled: true              // Poner false para desactivar la proteccion
+};
+
+// ========== GAME STATE ==========
+let state = {
+  // Student & Evaluation
+  studentName: '',
+  studentNombre: '',
+  studentApellido1: '',
+  studentApellido2: '',
+  studentTelEst: '',
+  studentTelEnc: '',
+  studentSeccion: '',
+  screen: ACCESS_CONFIG.enabled ? 'access' : 'register',
+  currentModeIndex: 0,
+  modesCompleted: { trivia: false, match: false, cycle: false, cancer: false },
+  // Per-topic tracking for SABER rubric
+  topicStats: {
+    organelos: { correct: 0, total: 0 },
+    ciclo: { correct: 0, total: 0 },
+    cancer: { correct: 0, total: 0 }
+  },
+
+  // Scoring
+  totalScore: 0,
+  triviaScore: 0,
+  matchScore: 0,
+  cycleScore: 0,
+  cancerScore: 0,
+  // Trivia
+  currentQuestion: 0,
+  triviaQuestions: [],
+  timer: 20,
+  timerInterval: null,
+  answered: false,
+  triviaCorrect: 0,
+  // Match
+  matchRound: 0,
+  selectedOrganelle: null,
+  selectedFunction: null,
+  matchedPairs: [],
+  matchAttempts: 0,
+  matchCorrect: 0,
+  // Cycle
+  placedPhases: [],
+  availablePhases: [],
+  cycleChecked: false,
+  // Cancer
+  currentScenario: 0,
+  cancerCorrect: 0,
+  cancerAnswered: false,
+  cancerScenarios: [],
+};
+
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ========== RENDER ==========
+// ========== ACCESS CONTROL ==========
+function checkDateAccess() {
+  if (!ACCESS_CONFIG.enabled) return { valid: true };
+  const today = new Date();
+  const start = new Date(ACCESS_CONFIG.startDate + 'T00:00:00');
+  const end = new Date(ACCESS_CONFIG.endDate + 'T23:59:59');
+
+  if (today < start) {
+    const diff = Math.ceil((start - today) / (1000 * 60 * 60 * 24));
+    return { valid: false, msg: 'El juego estara disponible a partir del ' + start.toLocaleDateString('es-CR', {day:'numeric',month:'long',year:'numeric'}) + '. Faltan ' + diff + ' dia(s).' };
+  }
+  if (today > end) {
+    return { valid: false, msg: 'El periodo de acceso finalizo el ' + end.toLocaleDateString('es-CR', {day:'numeric',month:'long',year:'numeric'}) + '. Contacta a tu profesor.' };
+  }
+  return { valid: true };
+}
+
+function renderAccessGate() {
+  const dateCheck = checkDateAccess();
+
+  if (!dateCheck.valid) {
+    return `
+      <div class="header">
+        <h1>🔬 BioQuest 8°</h1>
+        <p>Biologia Celular - Juego Interactivo</p>
+      </div>
+      <div class="card" style="max-width:450px;margin:20px auto;text-align:center;">
+        <div style="font-size:3rem;margin-bottom:15px;">🔒</div>
+        <h2 style="font-family:'Fredoka One',cursive;color:var(--secondary);margin-bottom:15px;">Acceso No Disponible</h2>
+        <p style="color:#666;line-height:1.6;">${dateCheck.msg}</p>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="header">
+      <h1>🔬 BioQuest 8°</h1>
+      <p>Biologia Celular - Juego Interactivo</p>
+    </div>
+    <div style="text-align:center;margin:10px 0;">${TEACHER_LOGO_SVG}</div>
+    <div class="card" style="max-width:450px;margin:20px auto;text-align:center;">
+      <div style="font-size:3rem;margin-bottom:15px;">🔐</div>
+      <h2 style="font-family:'Fredoka One',cursive;color:var(--primary);margin-bottom:15px;">Codigo de Acceso</h2>
+      <p style="color:#666;margin-bottom:20px;">Ingresa el codigo que te dio tu profesor para comenzar</p>
+      <input type="text" id="accessCode" placeholder="Codigo de acceso"
+        style="width:80%;padding:12px 15px;border:2px solid #e0e0e0;border-radius:12px;font-size:1.1rem;text-align:center;font-family:'Nunito',sans-serif;outline:none;transition:border 0.3s;"
+        onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#e0e0e0'"
+        onkeypress="if(event.key==='Enter')verifyAccessCode()">
+      <div id="accessError" style="color:var(--secondary);font-size:0.85rem;margin-top:10px;display:none;"></div>
+      <div style="margin-top:20px;">
+        <button class="btn btn-primary" onclick="verifyAccessCode()" style="padding:12px 40px;">Ingresar 🚀</button>
+      </div>
+      <p style="color:#aaa;font-size:0.75rem;margin-top:20px;">Periodo activo: ${new Date(ACCESS_CONFIG.startDate).toLocaleDateString('es-CR',{day:'numeric',month:'short'})} - ${new Date(ACCESS_CONFIG.endDate).toLocaleDateString('es-CR',{day:'numeric',month:'short',year:'numeric'})}</p>
+    </div>
+  `;
+}
+
+function verifyAccessCode() {
+  const input = document.getElementById('accessCode');
+  const error = document.getElementById('accessError');
+  if (!input) return;
+
+  const code = input.value.trim().toLowerCase();
+  if (code === ACCESS_CONFIG.code.toLowerCase()) {
+    state.screen = 'register';
+    render();
+  } else {
+    error.textContent = code ? '❌ Codigo incorrecto. Intenta de nuevo.' : 'Ingresa el codigo de acceso.';
+    error.style.display = 'block';
+    input.style.borderColor = 'var(--secondary)';
+    input.value = '';
+    input.focus();
+  }
+}
+
+function render() {
+  const app = document.getElementById('app');
+  switch(state.screen) {
+    case 'access': app.innerHTML = renderAccessGate(); break;
+    case 'register': app.innerHTML = renderRegister(); break;
+    case 'menu': app.innerHTML = renderMenu(); break;
+    case 'trivia': app.innerHTML = renderTrivia(); break;
+    case 'match': app.innerHTML = renderMatch(); break;
+    case 'cycle':
+      state._showingCycleFinalResults = false;
+      state._showingCyclePhase1Results = false;
+      app.innerHTML = renderCycle();
+      if (state._showingCycleFinalResults) startResultsTimer();
+      if (state._showingCyclePhase1Results) startCyclePhaseTimer();
+      break;
+    case 'cancer': app.innerHTML = renderCancer(); break;
+    case 'results': app.innerHTML = renderResults(); startResultsTimer(); break;
+    case 'transition': app.innerHTML = renderTransition(); break;
+    case 'report': app.innerHTML = renderReport(); startAutoSend(); break;
+  }
+}
+
+function renderRegister() {
+  return `
+    <div class="header">
+      <h1>🔬 BioQuest 8°</h1>
+      <p>Biologia Celular - Juego Interactivo</p>
+    </div>
+    <div style="text-align:center;margin:10px 0;">${TEACHER_LOGO_SVG}</div>
+    <div class="card register-card" style="max-width:500px;margin:20px auto;text-align:center;">
+      <div style="font-size:3rem;margin-bottom:10px;">🎓</div>
+      <h2 style="font-family:'Fredoka One',cursive;color:var(--primary);margin-bottom:10px;">Registro del Estudiante</h2>
+      <p style="color:#666;margin-bottom:15px;font-size:0.95rem;">Completa tus datos para comenzar. Al finalizar los 4 modos, recibiras tu evaluacion en los <strong>3 saberes de la rubrica MEP 2026</strong>.</p>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;text-align:left;">
+        <div>
+          <label style="font-size:0.75rem;color:#888;font-weight:700;display:block;margin-bottom:4px;">👤 Nombre *</label>
+          <input type="text" id="regNombre" placeholder="Ej: Carlos"
+            style="width:100%;padding:11px 15px;border:2px solid #e0e0e0;border-radius:12px;font-size:1rem;font-family:'Nunito',sans-serif;outline:none;transition:border 0.3s;"
+            onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#e0e0e0'">
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:150px;">
+            <label style="font-size:0.75rem;color:#888;font-weight:700;display:block;margin-bottom:4px;">📝 Primer apellido *</label>
+            <input type="text" id="regApellido1" placeholder="Ej: Rodriguez"
+              style="width:100%;padding:11px 15px;border:2px solid #e0e0e0;border-radius:12px;font-size:1rem;font-family:'Nunito',sans-serif;outline:none;transition:border 0.3s;"
+              onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#e0e0e0'">
+          </div>
+          <div style="flex:1;min-width:150px;">
+            <label style="font-size:0.75rem;color:#888;font-weight:700;display:block;margin-bottom:4px;">📝 Segundo apellido *</label>
+            <input type="text" id="regApellido2" placeholder="Ej: Mora"
+              style="width:100%;padding:11px 15px;border:2px solid #e0e0e0;border-radius:12px;font-size:1rem;font-family:'Nunito',sans-serif;outline:none;transition:border 0.3s;"
+              onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#e0e0e0'">
+          </div>
+        </div>
+        <div>
+          <label style="font-size:0.75rem;color:#888;font-weight:700;display:block;margin-bottom:4px;">🏫 Seccion *</label>
+          <select id="regSeccion"
+            style="width:100%;padding:11px 15px;border:2px solid #e0e0e0;border-radius:12px;font-size:1rem;font-family:'Nunito',sans-serif;outline:none;transition:border 0.3s;background:white;cursor:pointer;"
+            onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#e0e0e0'">
+            <option value="">-- Selecciona tu seccion --</option>
+            <option value="8-1">8-1</option>
+            <option value="8-2">8-2</option>
+            <option value="8-3">8-3</option>
+            <option value="8-4">8-4</option>
+            <option value="8-5">8-5</option>
+            <option value="8-6">8-6</option>
+          </select>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:150px;">
+            <label style="font-size:0.75rem;color:#888;font-weight:700;display:block;margin-bottom:4px;">📱 Tel. estudiante (opcional)</label>
+            <input type="tel" id="regTelEstudiante" placeholder="8888-8888"
+              style="width:100%;padding:11px 15px;border:2px solid #e0e0e0;border-radius:12px;font-size:0.95rem;font-family:'Nunito',sans-serif;outline:none;transition:border 0.3s;"
+              onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#e0e0e0'">
+          </div>
+          <div style="flex:1;min-width:150px;">
+            <label style="font-size:0.75rem;color:#888;font-weight:700;display:block;margin-bottom:4px;">📞 Tel. encargado (opcional)</label>
+            <input type="tel" id="regTelEncargado" placeholder="8888-8888"
+              style="width:100%;padding:11px 15px;border:2px solid #e0e0e0;border-radius:12px;font-size:0.95rem;font-family:'Nunito',sans-serif;outline:none;transition:border 0.3s;"
+              onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#e0e0e0'">
+          </div>
+        </div>
+        <div id="regError" style="display:none;color:var(--secondary);font-size:0.85rem;text-align:center;font-weight:700;"></div>
+      </div>
+      <button class="btn btn-primary" onclick="registerStudent()" style="padding:14px 40px;font-size:1.1rem;">
+        Comenzar Aventura 🚀
+      </button>
+      <div style="margin-top:20px;padding:15px;background:#f0efff;border-radius:12px;">
+        <p style="font-size:0.8rem;color:#666;">📋 <strong>Rubrica integrada MEP 2026 - Que se evalua:</strong></p>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:8px;font-size:0.78rem;color:#555;text-align:left;">
+          <div>🧠 <strong>SABER CONOCER</strong> - Concepto (Trivia)</div>
+          <div>🧩 <strong>SABER HACER</strong> - Habilidad cientifica (Conecta + Ordena)</div>
+          <div>🏥 <strong>SABER SER</strong> - Actitudes/valores (Detective del Cancer)</div>
+        </div>
+        <div style="display:flex;justify-content:center;gap:5px;margin-top:8px;flex-wrap:wrap;">
+          <span style="background:#e74c3c;color:white;padding:2px 8px;border-radius:8px;font-size:0.68rem;font-weight:700;">1. Inicial</span>
+          <span style="background:#f39c12;color:white;padding:2px 8px;border-radius:8px;font-size:0.68rem;font-weight:700;">2. Basico</span>
+          <span style="background:#3498db;color:white;padding:2px 8px;border-radius:8px;font-size:0.68rem;font-weight:700;">3. Aceptable</span>
+          <span style="background:#2ecc71;color:white;padding:2px 8px;border-radius:8px;font-size:0.68rem;font-weight:700;">4. Sobresaliente</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function registerStudent() {
+  const nombre = (document.getElementById('regNombre')?.value || '').trim();
+  const apellido1 = (document.getElementById('regApellido1')?.value || '').trim();
+  const apellido2 = (document.getElementById('regApellido2')?.value || '').trim();
+  const seccion = (document.getElementById('regSeccion')?.value || '').trim();
+  const telEst = (document.getElementById('regTelEstudiante')?.value || '').trim();
+  const telEnc = (document.getElementById('regTelEncargado')?.value || '').trim();
+  const errDiv = document.getElementById('regError');
+
+  // Validate required fields
+  const missing = [];
+  if (!nombre) missing.push('nombre');
+  if (!apellido1) missing.push('primer apellido');
+  if (!apellido2) missing.push('segundo apellido');
+  if (!seccion) missing.push('seccion');
+
+  if (missing.length > 0) {
+    if (errDiv) { errDiv.style.display = 'block'; errDiv.textContent = 'Falta: ' + missing.join(', '); }
+    if (!nombre) document.getElementById('regNombre').style.borderColor = 'var(--secondary)';
+    if (!apellido1) document.getElementById('regApellido1').style.borderColor = 'var(--secondary)';
+    if (!apellido2) document.getElementById('regApellido2').style.borderColor = 'var(--secondary)';
+    if (!seccion) document.getElementById('regSeccion').style.borderColor = 'var(--secondary)';
+    return;
+  }
+
+  state.studentNombre = nombre;
+  state.studentApellido1 = apellido1;
+  state.studentApellido2 = apellido2;
+  state.studentSeccion = seccion;
+  state.studentTelEst = telEst;
+  state.studentTelEnc = telEnc;
+  state.studentName = apellido1 + ' ' + apellido2 + ' ' + nombre;
+  // Reset all tracking
+  state.totalScore = 0;
+  state.triviaScore = 0; state.matchScore = 0; state.cycleScore = 0; state.cancerScore = 0;
+  state.modesCompleted = { trivia: false, match: false, cycle: false, cancer: false };
+  state.topicStats = {
+    organelos: { correct: 0, total: 0 },
+    ciclo: { correct: 0, total: 0 },
+    cancer: { correct: 0, total: 0 }
+  };
+  state.currentModeIndex = 0;
+  showTransition();
+}
+
+// ========== CONTINUOUS FLOW ==========
+const modeSequence = [
+  { key: 'trivia', name: 'Trivia Celular', icon: '🧠', color: 'var(--primary)', desc: '15 preguntas sobre organelos, ciclo celular y cancer. Tienes 20 segundos por pregunta.', num: '1' },
+  { key: 'match', name: 'Conecta Organelos', icon: '🧩', color: 'var(--accent)', desc: 'Relaciona cada organelo celular con su funcion. 3 rondas de dificultad creciente.', num: '2' },
+  { key: 'cycle', name: 'Ordena el Ciclo', icon: '🔄', color: 'var(--orange)', desc: 'Fase 1: Ordena las 8 fases del ciclo celular. Fase 2: Identifica las caracteristicas de cada fase.', num: '3' },
+  { key: 'cancer', name: 'Detective del Cancer', icon: '🏥', color: 'var(--secondary)', desc: 'Analiza 6 casos clinicos sobre causas, prevencion y deteccion del cancer.', num: '4' }
+];
+
+let transitionTimerInterval = null;
+
+function showTransition() {
+  state.screen = 'transition';
+  render();
+  startTransitionTimer();
+}
+
+function startTransitionTimer() {
+  clearInterval(transitionTimerInterval);
+  let countdown = 20;
+  transitionTimerInterval = setInterval(() => {
+    countdown--;
+    const el = document.getElementById('transitionCountdown');
+    if (el) {
+      el.textContent = countdown;
+      if (countdown <= 5) el.style.color = '#e74c3c';
+    }
+    if (countdown <= 0) {
+      clearInterval(transitionTimerInterval);
+      transitionTimerInterval = null;
+      launchCurrentMode();
+    }
+  }, 1000);
+}
+
+function renderTransition() {
+  const mode = modeSequence[state.currentModeIndex];
+  const completedCount = state.currentModeIndex;
+
+  return `
+    <div class="header">
+      <h1>🔬 BioQuest 8°</h1>
+      <p>👤 ${state.studentName}</p>
+    </div>
+    <div style="display:flex;justify-content:center;gap:8px;margin:10px 0;">
+      ${modeSequence.map((m, i) => `
+        <div style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.9rem;
+          ${i < completedCount ? 'background:var(--green);color:white;' : i === completedCount ? 'background:white;color:var(--primary);box-shadow:0 3px 10px rgba(0,0,0,0.2);' : 'background:rgba(255,255,255,0.25);color:rgba(255,255,255,0.7);'}">
+          ${i < completedCount ? '✓' : m.num}
+        </div>
+      `).join('')}
+    </div>
+    <div class="card" style="max-width:500px;margin:20px auto;text-align:center;">
+      <div style="font-size:3.5rem;margin-bottom:10px;">${mode.icon}</div>
+      <div style="display:inline-block;padding:5px 15px;background:${mode.color};color:white;border-radius:20px;font-size:0.8rem;font-weight:700;margin-bottom:10px;">
+        MODO ${mode.num} DE 4
+      </div>
+      <h2 style="font-family:'Fredoka One',cursive;color:var(--dark);margin-bottom:10px;">${mode.name}</h2>
+      <p style="color:#666;font-size:0.95rem;margin-bottom:20px;line-height:1.6;">${mode.desc}</p>
+      ${state.totalScore > 0 ? `<div style="margin-bottom:15px;padding:10px;background:#f8f9fa;border-radius:12px;"><span style="font-weight:700;color:var(--primary);">⭐ Puntaje acumulado: ${state.totalScore}</span></div>` : ''}
+      <div style="margin-bottom:12px;padding:8px 16px;background:rgba(102,126,234,0.1);border-radius:12px;font-size:0.9rem;color:#555;">
+        ⏱️ Comienza automaticamente en <span id="transitionCountdown" style="font-weight:800;color:var(--primary);font-size:1.1rem;">20</span> segundos...
+      </div>
+      <button class="btn btn-primary" onclick="launchCurrentMode()" style="padding:14px 40px;font-size:1.1rem;background:${mode.color};">
+        Comenzar ${mode.name} 🚀
+      </button>
+    </div>
+  `;
+}
+
+function launchCurrentMode() {
+  clearInterval(transitionTimerInterval);
+  transitionTimerInterval = null;
+  const mode = modeSequence[state.currentModeIndex];
+  switch(mode.key) {
+    case 'trivia': startTrivia(); break;
+    case 'match': startMatch(); break;
+    case 'cycle': startCycle(); break;
+    case 'cancer': startCancer(); break;
+  }
+}
+
+let resultsTimerInterval = null;
+
+function startResultsTimer() {
+  clearInterval(resultsTimerInterval);
+  let countdown = 15;
+  resultsTimerInterval = setInterval(() => {
+    countdown--;
+    const el = document.getElementById('resultsCountdown');
+    if (el) {
+      el.textContent = countdown;
+      if (countdown <= 5) el.style.color = '#e74c3c';
+    }
+    if (countdown <= 0) {
+      clearInterval(resultsTimerInterval);
+      resultsTimerInterval = null;
+      advanceToNextMode();
+    }
+  }, 1000);
+}
+
+function advanceToNextMode() {
+  clearInterval(resultsTimerInterval);
+  resultsTimerInterval = null;
+  state.currentModeIndex++;
+  if (state.currentModeIndex >= modeSequence.length) {
+    // All modes done, show report
+    state.screen = 'report';
+    render();
+  } else {
+    showTransition();
+  }
+}
+
+function renderMenu() {
+  return `
+    <div class="header">
+      <h1>🔬 BioQuest 8°</h1>
+      <p>Biologia Celular - Juego Interactivo</p>
+    </div>
+    <div class="score-bar">
+      <div class="score-item">👤 ${state.studentName}</div>
+      <div class="score-item">⭐ Puntaje Total: ${state.totalScore}</div>
+    </div>
+    <div class="menu-grid">
+      <div class="menu-card mode1" onclick="startTrivia()" style="position:relative;">
+        ${state.modesCompleted.trivia ? '<div class="mode-check">✓</div>' : ''}
+        <div class="menu-icon">🧠</div>
+        <h3>Trivia Celular</h3>
+        <p>30 preguntas con temporizador sobre organelos, ciclo celular y cancer</p>
+        ${state.triviaScore > 0 ? `<div style="margin-top:8px;color:var(--primary);font-weight:700">⭐ ${state.triviaScore} pts</div>` : ''}
+      </div>
+      <div class="menu-card mode2" onclick="startMatch()" style="position:relative;">
+        ${state.modesCompleted.match ? '<div class="mode-check">✓</div>' : ''}
+        <div class="menu-icon">🧩</div>
+        <h3>Conecta Organelos</h3>
+        <p>Relaciona cada organelo con su funcion correcta</p>
+        ${state.matchScore > 0 ? `<div style="margin-top:8px;color:var(--accent);font-weight:700">⭐ ${state.matchScore} pts</div>` : ''}
+      </div>
+      <div class="menu-card mode3" onclick="startCycle()" style="position:relative;">
+        ${state.modesCompleted.cycle ? '<div class="mode-check">✓</div>' : ''}
+        <div class="menu-icon">🔄</div>
+        <h3>Ordena el Ciclo</h3>
+        <p>Fase 1: Ordena las fases. Fase 2: Relaciona cada fase con sus caracteristicas</p>
+        ${state.cycleScore > 0 ? `<div style="margin-top:8px;color:var(--orange);font-weight:700">⭐ ${state.cycleScore} pts</div>` : ''}
+      </div>
+      <div class="menu-card mode4" onclick="startCancer()" style="position:relative;">
+        ${state.modesCompleted.cancer ? '<div class="mode-check">✓</div>' : ''}
+        <div class="menu-icon">🏥</div>
+        <h3>Detective del Cancer</h3>
+        <p>Analiza casos clinicos y encuentra causas y prevenciones</p>
+        ${state.cancerScore > 0 ? `<div style="margin-top:8px;color:var(--secondary);font-weight:700">⭐ ${state.cancerScore} pts</div>` : ''}
+      </div>
+    </div>
+    ${Object.values(state.modesCompleted).every(v => v) ?
+      '<div style="text-align:center;margin-top:15px;"><button class="btn btn-green report-btn" onclick="state.screen=\'report\';render();">📋 Ver Mi Reporte de Evaluacion MEP</button></div>' :
+      '<div style="text-align:center;margin-top:10px;color:rgba(255,255,255,0.8);font-size:0.85rem;">📋 Completa los 4 modos para obtener tu reporte MEP (' + Object.values(state.modesCompleted).filter(v=>v).length + '/4)</div>'}
+    <div style="text-align:center;margin-top:20px;color:rgba(255,255,255,0.7);font-size:0.85rem;">
+      Ciencias 8° - 1a Unidad | Basado en el material de clase
+    </div>
+  `;
+}
+
+// ========== TRIVIA ==========
+function startTrivia() {
+  const shuffled = shuffleArray(triviaQuestions);
+  state.triviaQuestions = shuffled.slice(0, 15);
+  state.currentQuestion = 0;
+  state.triviaCorrect = 0;
+  state.triviaScore = 0;
+  state.answered = false;
+  state.screen = 'trivia';
+  state.timer = 25;
+  render();
+  startTimer();
+}
+
+function startTimer() {
+  clearInterval(state.timerInterval);
+  state.timer = 25;
+  state.timerInterval = setInterval(() => {
+    state.timer--;
+    const timerEl = document.querySelector('.timer');
+    if (timerEl) {
+      timerEl.textContent = state.timer;
+      if (state.timer <= 5) timerEl.classList.add('warning');
+    }
+    if (state.timer <= 0) {
+      clearInterval(state.timerInterval);
+      if (!state.answered) {
+        // Track timeout as unanswered attempt
+        const q = state.triviaQuestions[state.currentQuestion];
+        if (q) {
+          state.topicStats[q.topic].total++;
+        }
+        state.answered = true;
+        render();
+        // Auto-advance after showing timeout feedback
+        setTimeout(() => {
+          if (state.screen === 'trivia') {
+            nextQuestion();
+          }
+        }, 3000);
+      }
+    }
+  }, 1000);
+}
+
+function renderTrivia() {
+  const q = state.triviaQuestions[state.currentQuestion];
+  if (!q) return renderTriviaResults();
+
+  const topicLabels = { organelos: 'Organelos', ciclo: 'Ciclo Celular', cancer: 'Cancer' };
+  const topicClasses = { organelos: 'tag-organelos', ciclo: 'tag-ciclo', cancer: 'tag-cancer' };
+  const progress = ((state.currentQuestion) / state.triviaQuestions.length) * 100;
+
+  let feedbackHTML = '';
+  if (state.answered) {
+    const isCorrect = document.querySelector('.option-btn.correct') !== null;
+    const wasTimedOut = state.timer <= 0;
+    if (wasTimedOut && !document.querySelector('.option-btn.correct')) {
+      feedbackHTML = `
+        <div class="feedback incorrect">
+          <p>⏰ Se acabo el tiempo!</p>
+          <p class="explanation">La respuesta correcta era: <strong>${q.options[q.correct]}</strong></p>
+          <p class="explanation">${q.explanation}</p>
+        </div>`;
+    }
+  }
+
+  return `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;color:white;font-size:0.85rem;flex-wrap:wrap;gap:5px;">
+      <span style="font-weight:700;">👤 ${state.studentName}</span>
+      <span style="background:rgba(255,255,255,0.2);padding:4px 12px;border-radius:15px;">Modo ${state.currentModeIndex + 1}/4</span>
+    </div>
+    <div class="card">
+      <div class="progress-bar">
+        <div class="progress-fill" style="width: ${progress}%"></div>
+      </div>
+      <div class="trivia-header">
+        <span class="question-counter">Pregunta ${state.currentQuestion + 1} / ${state.triviaQuestions.length}</span>
+        <span class="round-badge">⭐ ${state.triviaScore} pts</span>
+        <span class="timer ${state.timer <= 5 ? 'warning' : ''}">${state.timer}</span>
+      </div>
+      <span class="topic-tag ${topicClasses[q.topic]}">${topicLabels[q.topic]}</span>
+      <div class="question-text">${q.question}</div>
+      <div class="options-list">
+        ${q.options.map((opt, i) => `
+          <button class="option-btn ${state.answered ? (i === q.correct ? 'correct' : 'disabled') : ''}"
+            onclick="answerTrivia(${i})" ${state.answered ? 'disabled' : ''}>
+            ${String.fromCharCode(65 + i)}) ${opt}
+          </button>
+        `).join('')}
+      </div>
+      ${feedbackHTML}
+      ${state.answered ? `
+        <div style="text-align:center;margin-top:15px;color:#888;font-size:0.85rem;">
+          ⏳ Siguiente pregunta en un momento...
+        </div>
+      ` : ''}
+    </div>
+  `;
+}
+
+function answerTrivia(idx) {
+  if (state.answered) return;
+  state.answered = true;
+  clearInterval(state.timerInterval);
+
+  const q = state.triviaQuestions[state.currentQuestion];
+  const isCorrect = idx === q.correct;
+
+  // Track per-topic
+  const topic = q.topic;
+  state.topicStats[topic].total++;
+  if (isCorrect) {
+    state.topicStats[topic].correct++;
+  }
+
+  if (isCorrect) {
+    const points = Math.max(10, 10 + state.timer);
+    state.triviaScore += points;
+    state.totalScore += points;
+    state.triviaCorrect++;
+  }
+
+  const buttons = document.querySelectorAll('.option-btn');
+  buttons.forEach((btn, i) => {
+    btn.classList.add('disabled');
+    if (i === q.correct) btn.classList.add('correct');
+    else if (i === idx && !isCorrect) btn.classList.add('incorrect');
+  });
+
+  const optionsList = document.querySelector('.options-list');
+  const feedback = document.createElement('div');
+  feedback.className = `feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+  feedback.innerHTML = `
+    <p>${isCorrect ? '🎉 Correcto! +' + Math.max(10, 10 + state.timer) + ' pts' : '❌ Incorrecto'}</p>
+    <p class="explanation">${q.explanation}</p>
+  `;
+  optionsList.after(feedback);
+
+  // Auto-advance after 3 seconds for reading feedback
+  setTimeout(() => {
+    if (state.screen === 'trivia') {
+      nextQuestion();
+    }
+  }, 3000);
+}
+
+function nextQuestion() {
+  state.currentQuestion++;
+  state.answered = false;
+  if (state.currentQuestion >= state.triviaQuestions.length) {
+    state.modesCompleted.trivia = true;
+    state.screen = 'results';
+    state.resultMode = 'trivia';
+    render();
+  } else {
+    render();
+    startTimer();
+  }
+}
+
+// ========== MATCH ==========
+function startMatch() {
+  state.matchRound = 0;
+  state.matchScore = 0;
+  state.matchCorrect = 0;
+  state.matchAttempts = 0;
+  state._pairAttempts = 0;
+  state.matchTimer = 60;
+  state.selectedOrganelle = null;
+  state.selectedFunction = null;
+  state.matchedPairs = [];
+  state.screen = 'match';
+  render();
+  startMatchTimer();
+}
+
+function startMatchTimer() {
+  clearInterval(state.matchTimerInterval);
+  state.matchTimer = 60;
+  state.matchTimerInterval = setInterval(() => {
+    state.matchTimer--;
+    const timerEl = document.getElementById('matchTimerDisplay');
+    if (timerEl) {
+      timerEl.textContent = state.matchTimer;
+      if (state.matchTimer <= 10) timerEl.classList.add('warning');
+      else timerEl.classList.remove('warning');
+    }
+    if (state.matchTimer <= 0) {
+      clearInterval(state.matchTimerInterval);
+      autoMatchTimeout();
+    }
+  }, 1000);
+}
+
+function autoMatchTimeout() {
+  // Count remaining unmatched pairs as incorrect
+  const round = organelleMatchData[state.matchRound];
+  if (round) {
+    const remaining = round.pairs.length - state.matchedPairs.length;
+    state.topicStats.organelos.total += remaining;
+  }
+
+  // Move to next round or finish
+  state.matchRound++;
+  state.matchedPairs = [];
+  state._shuffledFuncs = null;
+  state._pairAttempts = 0;
+  state.selectedOrganelle = null;
+  state.selectedFunction = null;
+
+  if (state.matchRound >= organelleMatchData.length) {
+    state.modesCompleted.match = true;
+    state.resultMode = 'match';
+    state.screen = 'results';
+    render();
+  } else {
+    render();
+    startMatchTimer();
+  }
+}
+
+function renderMatch() {
+  if (state.matchRound >= organelleMatchData.length) {
+    state.modesCompleted.match = true;
+    state.resultMode = 'match';
+    state.screen = 'results';
+    return renderResults();
+  }
+
+  const round = organelleMatchData[state.matchRound];
+  const shuffledFuncs = state._shuffledFuncs || shuffleArray(round.pairs.map(p => p.func));
+  if (!state._shuffledFuncs) state._shuffledFuncs = shuffledFuncs;
+
+  return `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;color:white;font-size:0.85rem;flex-wrap:wrap;gap:5px;">
+      <span style="font-weight:700;">👤 ${state.studentName}</span>
+      <span style="background:rgba(255,255,255,0.2);padding:4px 12px;border-radius:15px;">Modo ${state.currentModeIndex + 1}/4</span>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:10px;">
+        <span class="round-badge">Ronda ${state.matchRound + 1} / ${organelleMatchData.length}</span>
+        <span class="round-badge" style="background:var(--accent)">⭐ ${state.matchScore} pts</span>
+        <span class="timer ${state.matchTimer <= 10 ? 'warning' : ''}" id="matchTimerDisplay">${state.matchTimer}</span>
+      </div>
+      <div class="match-instruction">🧩 ${round.title}</div>
+      <p style="text-align:center;font-size:0.9rem;color:#888;margin-bottom:15px;">Selecciona un organelo y luego su funcion correspondiente</p>
+      <div class="match-grid">
+        <div>
+          <div style="text-align:center;font-weight:700;color:#3498db;margin-bottom:8px;">🔬 Organelos</div>
+          ${round.pairs.map((p, i) => `
+            <div class="match-item match-organelle ${state.selectedOrganelle === i ? 'selected' : ''} ${state.matchedPairs.includes(i) ? 'matched' : ''}"
+              onclick="selectOrganelle(${i})" style="margin-bottom:8px;">
+              ${p.emoji} ${p.organelle}
+            </div>
+          `).join('')}
+        </div>
+        <div>
+          <div style="text-align:center;font-weight:700;color:#f1c40f;margin-bottom:8px;">⚙️ Funciones</div>
+          ${shuffledFuncs.map((f, i) => {
+            const origIdx = round.pairs.findIndex(p => p.func === f);
+            return `
+              <div class="match-item match-function ${state.selectedFunction === i ? 'selected' : ''} ${state.matchedPairs.includes(origIdx) ? 'matched' : ''}"
+                onclick="selectFunction(${i})" style="margin-bottom:8px;">
+                ${f}
+              </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function selectOrganelle(idx) {
+  if (state.matchedPairs.includes(idx)) return;
+  state.selectedOrganelle = idx;
+  if (state.selectedFunction !== null) checkMatch();
+  else render();
+}
+
+function selectFunction(idx) {
+  const round = organelleMatchData[state.matchRound];
+  const funcText = state._shuffledFuncs[idx];
+  const origIdx = round.pairs.findIndex(p => p.func === funcText);
+  if (state.matchedPairs.includes(origIdx)) return;
+  state.selectedFunction = idx;
+  if (state.selectedOrganelle !== null) checkMatch();
+  else render();
+}
+
+function checkMatch() {
+  const round = organelleMatchData[state.matchRound];
+  const funcText = state._shuffledFuncs[state.selectedFunction];
+  const correctFunc = round.pairs[state.selectedOrganelle].func;
+
+  state.matchAttempts++;
+
+  if (funcText === correctFunc) {
+    // Track organelos topic
+    state.topicStats.organelos.correct++;
+    state.topicStats.organelos.total++;
+
+    state.matchedPairs.push(state.selectedOrganelle);
+    state.matchCorrect++;
+    // Graduated scoring: 1st try = 15pts, 2nd = 10pts, 3rd+ = 5pts
+    const pairAttempts = (state._pairAttempts || 0);
+    const points = pairAttempts === 0 ? 15 : pairAttempts === 1 ? 10 : 5;
+    state._pairAttempts = 0;
+    state.matchScore += points;
+    state.totalScore += points;
+    state.selectedOrganelle = null;
+    state.selectedFunction = null;
+
+    if (state.matchedPairs.length === round.pairs.length) {
+      clearInterval(state.matchTimerInterval);
+      setTimeout(() => {
+        state.matchRound++;
+        state.matchedPairs = [];
+        state._shuffledFuncs = null;
+        state._pairAttempts = 0;
+        render();
+        if (state.matchRound < organelleMatchData.length) {
+          startMatchTimer();
+        }
+      }, 800);
+    }
+    render();
+  } else {
+    // Track incorrect organelos attempt
+    state.topicStats.organelos.total++;
+    state._pairAttempts = (state._pairAttempts || 0) + 1;
+
+    render();
+    setTimeout(() => {
+      const items = document.querySelectorAll('.match-item.selected');
+      items.forEach(el => { el.classList.add('wrong'); el.classList.remove('selected'); });
+      setTimeout(() => {
+        state.selectedOrganelle = null;
+        state.selectedFunction = null;
+        render();
+      }, 500);
+    }, 100);
+  }
+}
+
+// ========== CYCLE SORT ==========
+function startCycle() {
+  state.placedPhases = new Array(8).fill(null);
+  state.availablePhases = shuffleArray([...Array(8).keys()]);
+  state.cycleChecked = false;
+  state.cycleScore = 0;
+  state.cyclePhase2 = false; // false = Fase 1 (ordenar), true = Fase 2 (caracteristicas)
+  state.cyclePhase1Score = 0;
+  state.cyclePhase2Score = 0;
+  // Phase 2 state
+  state.charCurrentQ = 0;
+  state.charQuestions = [];
+  state.charAnswered = false;
+  state.charCorrect = 0;
+  state.screen = 'cycle';
+  render();
+}
+
+function renderCycle() {
+  if (state.cyclePhase2) return renderCyclePhase2();
+  if (state.cycleChecked) return renderCyclePhase1Results();
+
+  const placedCount = state.placedPhases.filter(p => p !== null).length;
+
+  return `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;color:white;font-size:0.85rem;flex-wrap:wrap;gap:5px;">
+      <span style="font-weight:700;">👤 ${state.studentName}</span>
+      <span style="background:rgba(255,255,255,0.2);padding:4px 12px;border-radius:15px;">Modo ${state.currentModeIndex + 1}/4</span>
+    </div>
+    <div class="card">
+      <div style="text-align:center;margin-bottom:15px;">
+        <span class="round-badge" style="background:var(--orange);">FASE 1 de 2</span>
+        <h2 style="font-family:'Fredoka One',cursive;color:var(--orange);margin-top:10px;">🔄 Ordena el Ciclo Celular</h2>
+        <p style="color:#888;font-size:0.9rem;margin-top:5px;">Coloca las 8 fases en el orden correcto (desde G1 hasta Citocinesis)</p>
+      </div>
+
+      <div style="text-align:center;margin-bottom:15px;font-weight:700;color:var(--orange);">
+        Fases disponibles - toca una para colocarla:
+      </div>
+      <div class="phase-options">
+        ${state.availablePhases.map(idx => {
+          const isPlaced = state.placedPhases.includes(idx);
+          return `<div class="phase-chip ${isPlaced ? 'placed' : 'available'}"
+            onclick="placePhase(${idx})">${cyclePhases[idx].name}</div>`;
+        }).join('')}
+      </div>
+
+      <div style="margin:15px 0;padding:10px;background:#f8f9fa;border-radius:12px;">
+        <div style="font-weight:700;text-align:center;margin-bottom:10px;color:var(--dark);">Orden del ciclo celular:</div>
+        <div class="cycle-phases">
+          ${state.placedPhases.map((phaseIdx, slotIdx) => `
+            <div class="phase-slot ${phaseIdx !== null ? 'filled' : ''}" onclick="removePhase(${slotIdx})">
+              <div class="slot-number">${slotIdx + 1}</div>
+              <span style="font-weight:600;font-size:0.95rem;">
+                ${phaseIdx !== null ? cyclePhases[phaseIdx].name : '(vacio - toca una fase arriba)'}
+              </span>
+              ${phaseIdx !== null ? '<span style="margin-left:auto;font-size:0.8rem;color:#999;">✕ quitar</span>' : ''}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div style="text-align:center;">
+        ${placedCount === 8 ? `<button class="btn btn-green" onclick="checkCycle()">Verificar Orden ✓</button>` :
+          `<p style="color:#888;font-size:0.9rem;">Coloca las ${8 - placedCount} fases restantes</p>`}
+      </div>
+    </div>
+  `;
+}
+
+function placePhase(phaseIdx) {
+  if (state.placedPhases.includes(phaseIdx)) return;
+  const emptySlot = state.placedPhases.indexOf(null);
+  if (emptySlot === -1) return;
+  state.placedPhases[emptySlot] = phaseIdx;
+  render();
+}
+
+function removePhase(slotIdx) {
+  if (state.placedPhases[slotIdx] === null) return;
+  state.placedPhases[slotIdx] = null;
+  const filled = state.placedPhases.filter(p => p !== null);
+  state.placedPhases = [...filled, ...new Array(8 - filled.length).fill(null)];
+  render();
+}
+
+function checkCycle() {
+  state.cycleChecked = true;
+  let correct = 0;
+  state.placedPhases.forEach((phaseIdx, slotIdx) => {
+    state.topicStats.ciclo.total++;
+    if (phaseIdx === slotIdx) {
+      correct++;
+      state.topicStats.ciclo.correct++;
+    }
+  });
+  state.cyclePhase1Score = correct * 15;
+  render();
+}
+
+function renderCyclePhase1Results() {
+  state._showingCyclePhase1Results = true;
+  let correct = 0;
+  state.placedPhases.forEach((phaseIdx, slotIdx) => {
+    if (phaseIdx === slotIdx) correct++;
+  });
+
+  return `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;color:white;font-size:0.85rem;flex-wrap:wrap;gap:5px;">
+      <span style="font-weight:700;">👤 ${state.studentName}</span>
+      <span style="background:rgba(255,255,255,0.2);padding:4px 12px;border-radius:15px;">Modo ${state.currentModeIndex + 1}/4</span>
+    </div>
+    <div class="card">
+      <div style="text-align:center;margin-bottom:15px;">
+        <span class="round-badge" style="background:var(--green);">FASE 1 - Completada</span>
+        <h2 style="font-family:'Fredoka One',cursive;color:var(--orange);margin-top:10px;">🔄 Resultado: Orden del Ciclo</h2>
+        <p style="font-size:1.2rem;font-weight:700;color:var(--primary);margin:10px 0;">${correct} / 8 correctas = ${state.cyclePhase1Score} pts</p>
+      </div>
+      <div class="cycle-phases">
+        ${state.placedPhases.map((phaseIdx, slotIdx) => {
+          const isCorrect = phaseIdx === slotIdx;
+          return `
+            <div class="phase-slot ${isCorrect ? 'correct-slot' : 'wrong-slot'}">
+              <div class="slot-number" style="background:${isCorrect ? 'var(--green)' : 'var(--secondary)'}">${slotIdx + 1}</div>
+              <div>
+                <div style="font-weight:700;font-size:0.95rem;">
+                  ${isCorrect ? '✅' : '❌'} Tu respuesta: ${cyclePhases[phaseIdx].name}
+                </div>
+                ${!isCorrect ? `<div style="font-size:0.85rem;color:var(--green);font-weight:600;">Correcta: ${cyclePhases[slotIdx].name}</div>` : ''}
+                <div style="font-size:0.8rem;color:#888;margin-top:3px;">${cyclePhases[slotIdx].desc}</div>
+              </div>
+            </div>`;
+        }).join('')}
+      </div>
+      <div style="text-align:center;margin-top:20px;padding:15px;background:linear-gradient(135deg,#fff3e0,#ffe0b2);border-radius:15px;">
+        <p style="font-weight:700;color:var(--orange);font-size:1.1rem;">🧬 Ahora viene la Fase 2!</p>
+        <p style="color:#666;font-size:0.9rem;margin:8px 0;">Relaciona cada fase del ciclo con sus 2 caracteristicas principales</p>
+        <div style="margin:8px 0;font-size:0.85rem;color:#555;">
+          ⏱️ Comienza automaticamente en <span id="cyclePhaseCountdown" style="font-weight:800;color:var(--orange);font-size:1rem;">15</span> segundos...
+        </div>
+        <button class="btn btn-orange" onclick="launchCyclePhase2()" style="margin-top:10px;">Continuar a Fase 2 →</button>
+      </div>
+    </div>
+  `;
+}
+
+let cyclePhaseTimerInterval = null;
+
+function startCyclePhaseTimer() {
+  clearInterval(cyclePhaseTimerInterval);
+  let countdown = 15;
+  cyclePhaseTimerInterval = setInterval(() => {
+    countdown--;
+    const el = document.getElementById('cyclePhaseCountdown');
+    if (el) {
+      el.textContent = countdown;
+      if (countdown <= 5) el.style.color = '#e74c3c';
+    }
+    if (countdown <= 0) {
+      clearInterval(cyclePhaseTimerInterval);
+      cyclePhaseTimerInterval = null;
+      startCyclePhase2();
+    }
+  }, 1000);
+}
+
+function launchCyclePhase2() {
+  clearInterval(cyclePhaseTimerInterval);
+  cyclePhaseTimerInterval = null;
+  startCyclePhase2();
+}
+
+// ========== CYCLE PHASE 2: Match characteristics ==========
+function startCyclePhase2() {
+  state.cyclePhase2 = true;
+  state.charCorrect = 0;
+  state.charCurrentQ = 0;
+  state.charAnswered = false;
+  state.cyclePhase2Score = 0;
+  state.charTimer = 30;
+  clearInterval(state.charTimerInterval);
+
+  // Generate 8 questions, one per phase
+  // Each question shows a phase name and 4 characteristic options (2 correct, 2 distractors)
+  const questions = [];
+  const allChars = cyclePhases.flatMap((p, i) => p.chars.map(c => ({ text: c, phaseIdx: i })));
+
+  cyclePhases.forEach((phase, idx) => {
+    // Get the 2 correct characteristics
+    const correctChars = phase.chars;
+    // Get 2 distractors from other phases
+    const otherChars = allChars.filter(c => c.phaseIdx !== idx);
+    const shuffledOthers = shuffleArray(otherChars);
+    const distractors = shuffledOthers.slice(0, 2).map(c => c.text);
+
+    // Build 4 options
+    const options = shuffleArray([
+      { text: correctChars[0], correct: true },
+      { text: correctChars[1], correct: true },
+      { text: distractors[0], correct: false },
+      { text: distractors[1], correct: false },
+    ]);
+
+    questions.push({
+      phaseName: phase.name,
+      phaseColor: phase.color,
+      phaseDesc: phase.desc,
+      options: options,
+    });
+  });
+
+  state.charQuestions = shuffleArray(questions);
+  render();
+  startCharTimer();
+}
+
+function startCharTimer() {
+  clearInterval(state.charTimerInterval);
+  state.charTimer = 30;
+  state.charTimerInterval = setInterval(() => {
+    state.charTimer--;
+    const timerEl = document.getElementById('charTimerDisplay');
+    if (timerEl) {
+      timerEl.textContent = state.charTimer;
+      if (state.charTimer <= 5) timerEl.classList.add('warning');
+      else timerEl.classList.remove('warning');
+    }
+    if (state.charTimer <= 0) {
+      clearInterval(state.charTimerInterval);
+      if (!state.charAnswered) {
+        // Time's up - auto-check with whatever is selected (or nothing)
+        autoCheckCharTimeout();
+      }
+    }
+  }, 1000);
+}
+
+function autoCheckCharTimeout() {
+  state.charAnswered = true;
+  const allBtns = document.querySelectorAll('.char-opt');
+  let correctCount = 0;
+
+  allBtns.forEach(btn => {
+    btn.style.pointerEvents = 'none';
+    const isCorrect = btn.dataset.correct === 'true';
+    const isSelected = btn.classList.contains('selected-char');
+
+    if (isCorrect) {
+      btn.style.borderColor = 'var(--green)';
+      btn.style.background = '#d5f5e3';
+      btn.style.color = '#1a7a3a';
+    }
+    if (isSelected && !isCorrect) {
+      btn.style.borderColor = 'var(--secondary)';
+      btn.style.background = '#ffe8e8';
+      btn.style.color = '#c0392b';
+    }
+    if (isSelected && isCorrect) correctCount++;
+  });
+
+  state.topicStats.ciclo.total += 2;
+  state.topicStats.ciclo.correct += correctCount;
+
+  const points = correctCount * 10;
+  state.cyclePhase2Score += points;
+  state.charCorrect += correctCount;
+
+  const fbDiv = document.getElementById('char-feedback');
+  const q = state.charQuestions[state.charCurrentQ];
+  const checkBtn = document.getElementById('charCheckBtn');
+  if (checkBtn) checkBtn.style.display = 'none';
+  const hint = document.getElementById('charHint');
+  if (hint) hint.style.display = 'none';
+
+  fbDiv.innerHTML = `
+    <div class="feedback incorrect" style="margin-top:15px;">
+      <p>⏰ Se acabo el tiempo! ${correctCount > 0 ? '+' + points + ' pts' : 'Sin puntos'}</p>
+      <p class="explanation" style="margin-top:8px;">Las 2 caracteristicas de <strong>${q.phaseName}</strong> son:</p>
+      <p class="explanation">✅ ${q.options.find(o => o.correct).text}</p>
+      <p class="explanation">✅ ${q.options.filter(o => o.correct)[1].text}</p>
+    </div>
+    <div style="text-align:center;margin-top:15px;color:#888;font-size:0.85rem;">
+      ⏳ Siguiente en un momento...
+    </div>
+  `;
+
+  setTimeout(() => { nextCharQuestion(); }, 3000);
+}
+
+function renderCyclePhase2() {
+  if (state.charCurrentQ >= state.charQuestions.length) {
+    return renderCycleFinalResults();
+  }
+
+  const q = state.charQuestions[state.charCurrentQ];
+  const progress = (state.charCurrentQ / state.charQuestions.length) * 100;
+
+  return `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;color:white;font-size:0.85rem;flex-wrap:wrap;gap:5px;">
+      <span style="font-weight:700;">👤 ${state.studentName}</span>
+      <span style="background:rgba(255,255,255,0.2);padding:4px 12px;border-radius:15px;">Modo ${state.currentModeIndex + 1}/4</span>
+    </div>
+    <div class="card">
+      <div class="progress-bar">
+        <div class="progress-fill" style="width:${progress}%;background:linear-gradient(90deg,var(--orange),#e67e22);"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:10px;">
+        <span class="round-badge" style="background:var(--orange);">FASE 2 - Pregunta ${state.charCurrentQ + 1}/${state.charQuestions.length}</span>
+        <span class="round-badge">⭐ ${state.cyclePhase1Score + state.cyclePhase2Score} pts</span>
+        <span class="timer ${state.charTimer <= 5 ? 'warning' : ''}" id="charTimerDisplay">${state.charTimer}</span>
+      </div>
+
+      <div style="text-align:center;margin-bottom:15px;">
+        <div style="display:inline-block;padding:10px 25px;background:${q.phaseColor};color:white;border-radius:15px;font-family:'Fredoka One',cursive;font-size:1.3rem;">
+          🔬 ${q.phaseName}
+        </div>
+      </div>
+
+      <div class="question-text" style="text-align:center;font-size:1rem;">
+        Selecciona las <strong>2 caracteristicas</strong> que corresponden a esta fase:
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:15px;">
+        ${q.options.map((opt, i) => `
+          <button class="option-btn char-opt" data-idx="${i}" data-correct="${opt.correct}"
+            onclick="toggleCharOption(this, ${i})"
+            style="border-width:3px;${state.charAnswered ? 'pointer-events:none;' : ''}">
+            ${opt.text}
+          </button>
+        `).join('')}
+      </div>
+
+      ${!state.charAnswered ? `
+        <div style="text-align:center;margin-top:15px;">
+          <button class="btn btn-green" id="charCheckBtn" onclick="checkCharAnswer()" style="display:none;">Verificar Seleccion ✓</button>
+          <p id="charHint" style="color:#888;font-size:0.85rem;">Selecciona exactamente 2 opciones</p>
+        </div>
+      ` : ''}
+      <div id="char-feedback"></div>
+    </div>
+  `;
+}
+
+function toggleCharOption(el, idx) {
+  if (state.charAnswered) return;
+
+  el.classList.toggle('selected-char');
+
+  // Apply styles
+  if (el.classList.contains('selected-char')) {
+    el.style.borderColor = 'var(--primary)';
+    el.style.background = '#f0efff';
+  } else {
+    el.style.borderColor = '#e0e0e0';
+    el.style.background = 'white';
+  }
+
+  // Count selected
+  const selected = document.querySelectorAll('.char-opt.selected-char');
+  const checkBtn = document.getElementById('charCheckBtn');
+  const hint = document.getElementById('charHint');
+
+  if (selected.length === 2) {
+    if (checkBtn) checkBtn.style.display = 'inline-block';
+    if (hint) hint.style.display = 'none';
+  } else {
+    if (checkBtn) checkBtn.style.display = 'none';
+    if (hint) { hint.style.display = 'block'; hint.textContent = `Selecciona ${2 - selected.length} opcion(es) mas`; }
+  }
+}
+
+function checkCharAnswer() {
+  state.charAnswered = true;
+  clearInterval(state.charTimerInterval);
+  const selected = document.querySelectorAll('.char-opt.selected-char');
+  const allBtns = document.querySelectorAll('.char-opt');
+  let correctCount = 0;
+
+  allBtns.forEach(btn => {
+    btn.style.pointerEvents = 'none';
+    const isCorrect = btn.dataset.correct === 'true';
+    const isSelected = btn.classList.contains('selected-char');
+
+    if (isCorrect) {
+      btn.style.borderColor = 'var(--green)';
+      btn.style.background = '#d5f5e3';
+      btn.style.color = '#1a7a3a';
+    }
+    if (isSelected && !isCorrect) {
+      btn.style.borderColor = 'var(--secondary)';
+      btn.style.background = '#ffe8e8';
+      btn.style.color = '#c0392b';
+    }
+    if (isSelected && isCorrect) {
+      correctCount++;
+    }
+  });
+
+  // Track ciclo phase 2 answers
+  state.topicStats.ciclo.total += 2; // 2 options to get right
+  state.topicStats.ciclo.correct += correctCount;
+
+  const points = correctCount * 10;
+  state.cyclePhase2Score += points;
+  state.charCorrect += correctCount;
+
+  const fbDiv = document.getElementById('char-feedback');
+  const q = state.charQuestions[state.charCurrentQ];
+  const isAllCorrect = correctCount === 2;
+
+  const checkBtn = document.getElementById('charCheckBtn');
+  if (checkBtn) checkBtn.style.display = 'none';
+  const hint = document.getElementById('charHint');
+  if (hint) hint.style.display = 'none';
+
+  fbDiv.innerHTML = `
+    <div class="feedback ${isAllCorrect ? 'correct' : 'incorrect'}" style="margin-top:15px;">
+      <p>${isAllCorrect ? '🎉 Perfecto! Ambas correctas! +20 pts' : correctCount === 1 ? '🤔 Acertaste 1 de 2. +10 pts' : '❌ Ninguna fue correcta'}</p>
+      <p class="explanation" style="margin-top:8px;">Las 2 caracteristicas de <strong>${q.phaseName}</strong> son:</p>
+      <p class="explanation">✅ ${q.options.find(o => o.correct).text}</p>
+      <p class="explanation">✅ ${q.options.filter(o => o.correct)[1].text}</p>
+    </div>
+    <div style="text-align:center;margin-top:15px;color:#888;font-size:0.85rem;">
+      ⏳ Siguiente en un momento...
+    </div>
+  `;
+
+  // Auto-advance after 3 seconds for reading feedback
+  setTimeout(() => {
+    nextCharQuestion();
+  }, 3000);
+}
+
+function nextCharQuestion() {
+  state.charCurrentQ++;
+  state.charAnswered = false;
+  clearInterval(state.charTimerInterval);
+  render();
+  if (state.charCurrentQ < state.charQuestions.length) {
+    startCharTimer();
+  }
+}
+
+function renderCycleFinalResults() {
+  state.modesCompleted.cycle = true;
+  state._showingCycleFinalResults = true;
+  state.cycleScore = state.cyclePhase1Score + state.cyclePhase2Score;
+  state.totalScore += state.cycleScore;
+
+  let phase1Correct = 0;
+  state.placedPhases.forEach((phaseIdx, slotIdx) => {
+    if (phaseIdx === slotIdx) phase1Correct++;
+  });
+
+  const totalPossible = (8 * 15) + (8 * 20); // 120 + 160 = 280
+  const pct = Math.round((state.cycleScore / totalPossible) * 100);
+
+  let msg;
+  if (pct >= 90) msg = '🌟 Dominas el ciclo celular como un biologo!';
+  else if (pct >= 70) msg = '👏 Muy buen conocimiento del ciclo celular!';
+  else if (pct >= 50) msg = '💪 Buen intento! Repasa las fases y sus detalles.';
+  else msg = '📚 Necesitas estudiar mas el ciclo celular. Tu puedes!';
+
+  showConfetti();
+
+  const nextModeInfo = state.currentModeIndex < modeSequence.length - 1 ? modeSequence[state.currentModeIndex + 1] : null;
+
+  return `
+    <div class="card results-card">
+      <div class="results-icon">🔄</div>
+      <h2 style="font-family:'Fredoka One',cursive;margin-bottom:5px;">Ciclo Celular - Resultado Final</h2>
+      <div class="results-score">${state.cycleScore} pts</div>
+      <div class="results-msg">${msg}</div>
+
+      <div class="results-stats">
+        <div class="stat-box">
+          <div class="num" style="font-size:1.3rem;">${phase1Correct}/8</div>
+          <div class="label">Fase 1: Orden</div>
+          <div style="font-size:0.75rem;color:var(--primary);font-weight:700;">${state.cyclePhase1Score} pts</div>
+        </div>
+        <div class="stat-box">
+          <div class="num" style="font-size:1.3rem;">${state.charCorrect}/16</div>
+          <div class="label">Fase 2: Caracteristicas</div>
+          <div style="font-size:0.75rem;color:var(--orange);font-weight:700;">${state.cyclePhase2Score} pts</div>
+        </div>
+        <div class="stat-box">
+          <div class="num">${pct}%</div>
+          <div class="label">Rendimiento</div>
+        </div>
+      </div>
+
+      <div style="margin:15px 0;padding:15px;background:#f8f9fa;border-radius:15px;">
+        <p style="font-weight:700;color:var(--primary);">⭐ Puntaje Total Acumulado: ${state.totalScore}</p>
+        <p style="font-size:0.85rem;color:#888;margin-top:5px;">Modo ${state.currentModeIndex + 1} de 4 completado</p>
+      </div>
+
+      <div style="text-align:center;">
+        <div style="margin-bottom:10px;padding:6px 14px;background:rgba(46,204,113,0.1);border-radius:10px;font-size:0.85rem;color:#555;">
+          ⏱️ Avanza automaticamente en <span id="resultsCountdown" style="font-weight:800;color:var(--green);font-size:1rem;">15</span> segundos...
+        </div>
+        <button class="btn btn-green" onclick="advanceToNextMode()" style="padding:14px 40px;font-size:1.1rem;">
+          ${nextModeInfo ? nextModeInfo.icon + ' Continuar: ' + nextModeInfo.name + ' →' : '📋 Ver Mi Reporte MEP 🏆'}
+        </button>
+      </div>
+    </div>
+    <div class="confetti-container" id="confetti"></div>
+  `;
+}
+
+// ========== CANCER DETECTIVE ==========
+function startCancer() {
+  state.cancerScenarios = shuffleArray(cancerScenarios).slice(0, 6);
+  state.currentScenario = 0;
+  state.cancerCorrect = 0;
+  state.cancerScore = 0;
+  state.cancerAnswered = false;
+  state.cancerTimer = 30;
+  state.screen = 'cancer';
+  render();
+  startCancerTimer();
+}
+
+function startCancerTimer() {
+  clearInterval(state.cancerTimerInterval);
+  state.cancerTimer = 30;
+  state.cancerTimerInterval = setInterval(() => {
+    state.cancerTimer--;
+    const timerEl = document.getElementById('cancerTimerDisplay');
+    if (timerEl) {
+      timerEl.textContent = state.cancerTimer;
+      if (state.cancerTimer <= 5) timerEl.classList.add('warning');
+      else timerEl.classList.remove('warning');
+    }
+    if (state.cancerTimer <= 0) {
+      clearInterval(state.cancerTimerInterval);
+      if (!state.cancerAnswered) {
+        autoCancerTimeout();
+      }
+    }
+  }, 1000);
+}
+
+function autoCancerTimeout() {
+  state.cancerAnswered = true;
+  const s = state.cancerScenarios[state.currentScenario];
+
+  state.topicStats.cancer.total++;
+
+  const buttons = document.querySelectorAll('.cancer-opt');
+  buttons.forEach((btn, i) => {
+    btn.classList.add('disabled');
+    if (i === s.correct) btn.classList.add('correct');
+  });
+
+  const fbDiv = document.getElementById('cancer-feedback');
+  fbDiv.innerHTML = `
+    <div class="feedback incorrect" style="margin-top:15px;">
+      <p>⏰ Se acabo el tiempo!</p>
+      <p class="explanation">${s.explanation}</p>
+    </div>
+    <div style="text-align:center;margin-top:15px;color:#888;font-size:0.85rem;">
+      ⏳ Siguiente en un momento...
+    </div>
+  `;
+
+  setTimeout(() => { nextScenario(); }, 3000);
+}
+
+function renderCancer() {
+  if (state.currentScenario >= state.cancerScenarios.length) {
+    state.resultMode = 'cancer';
+    state.screen = 'results';
+    return renderResults();
+  }
+
+  const s = state.cancerScenarios[state.currentScenario];
+  const progress = (state.currentScenario / state.cancerScenarios.length) * 100;
+
+  return `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;color:white;font-size:0.85rem;flex-wrap:wrap;gap:5px;">
+      <span style="font-weight:700;">👤 ${state.studentName}</span>
+      <span style="background:rgba(255,255,255,0.2);padding:4px 12px;border-radius:15px;">Modo ${state.currentModeIndex + 1}/4</span>
+    </div>
+    <div class="card">
+      <div class="progress-bar">
+        <div class="progress-fill" style="width:${progress}%;background:linear-gradient(90deg,var(--secondary),#ff8a80);"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;flex-wrap:wrap;gap:10px;">
+        <span class="round-badge" style="background:var(--secondary)">🏥 Caso ${state.currentScenario + 1} / ${state.cancerScenarios.length}</span>
+        <span class="round-badge">⭐ ${state.cancerScore} pts</span>
+        <span class="timer ${state.cancerTimer <= 5 ? 'warning' : ''}" id="cancerTimerDisplay">${state.cancerTimer}</span>
+      </div>
+
+      <div class="cancer-scenario">
+        <h3>📋 Caso Clinico</h3>
+        <p>${s.scenario}</p>
+      </div>
+
+      <div class="question-text" style="font-size:1rem;">${s.question}</div>
+
+      <div class="cancer-options">
+        ${s.options.map((opt, i) => `
+          <button class="cancer-opt ${state.cancerAnswered ? (i === s.correct ? 'correct' : 'disabled') : ''}"
+            onclick="answerCancer(${i})" ${state.cancerAnswered ? 'disabled' : ''}>
+            ${opt}
+          </button>
+        `).join('')}
+      </div>
+
+      <div id="cancer-feedback"></div>
+    </div>
+  `;
+}
+
+function answerCancer(idx) {
+  if (state.cancerAnswered) return;
+  state.cancerAnswered = true;
+  clearInterval(state.cancerTimerInterval);
+
+  const s = state.cancerScenarios[state.currentScenario];
+  const isCorrect = idx === s.correct;
+
+  // Track cancer topic
+  state.topicStats.cancer.total++;
+  if (isCorrect) {
+    state.topicStats.cancer.correct++;
+  }
+
+  if (isCorrect) {
+    state.cancerCorrect++;
+    state.cancerScore += 20;
+    state.totalScore += 20;
+  }
+
+  const buttons = document.querySelectorAll('.cancer-opt');
+  buttons.forEach((btn, i) => {
+    btn.classList.add('disabled');
+    if (i === s.correct) btn.classList.add('correct');
+    else if (i === idx && !isCorrect) btn.classList.add('incorrect');
+  });
+
+  const fbDiv = document.getElementById('cancer-feedback');
+  fbDiv.innerHTML = `
+    <div class="feedback ${isCorrect ? 'correct' : 'incorrect'}" style="margin-top:15px;">
+      <p>${isCorrect ? '🎉 Excelente detective! +20 pts' : '❌ No exactamente...'}</p>
+      <p class="explanation">${s.explanation}</p>
+    </div>
+    <div style="text-align:center;margin-top:15px;color:#888;font-size:0.85rem;">
+      ⏳ Siguiente en un momento...
+    </div>
+  `;
+
+  // Auto-advance after 3 seconds
+  setTimeout(() => { nextScenario(); }, 3000);
+}
+
+function nextScenario() {
+  state.currentScenario++;
+  state.cancerAnswered = false;
+  clearInterval(state.cancerTimerInterval);
+  if (state.currentScenario >= state.cancerScenarios.length) {
+    state.modesCompleted.cancer = true;
+    state.resultMode = 'cancer';
+    state.screen = 'results';
+  }
+  render();
+  if (state.screen === 'cancer') {
+    startCancerTimer();
+  }
+}
+
+// ========== RESULTS ==========
+function renderResults() {
+  let icon, title, score, total, correct, totalQ, msg;
+
+  switch (state.resultMode) {
+    case 'trivia':
+      icon = '🧠'; title = 'Trivia Celular';
+      score = state.triviaScore; correct = state.triviaCorrect;
+      totalQ = state.triviaQuestions.length;
+      break;
+    case 'match':
+      icon = '🧩'; title = 'Conecta Organelos';
+      score = state.matchScore; correct = state.matchCorrect;
+      totalQ = organelleMatchData.reduce((sum, r) => sum + r.pairs.length, 0);
+      break;
+    case 'cancer':
+      icon = '🏥'; title = 'Detective del Cancer';
+      score = state.cancerScore; correct = state.cancerCorrect;
+      totalQ = state.cancerScenarios.length;
+      break;
+  }
+
+  const pct = Math.round((correct / totalQ) * 100);
+  if (pct >= 90) msg = '🌟 Increible! Eres un experto en biologia!';
+  else if (pct >= 70) msg = '👏 Muy bien! Buen dominio del tema!';
+  else if (pct >= 50) msg = '💪 Buen intento! Sigue estudiando!';
+  else msg = '📚 Necesitas repasar. No te rindas!';
+
+  showConfetti();
+
+  const nextModeInfo = state.currentModeIndex < modeSequence.length - 1 ? modeSequence[state.currentModeIndex + 1] : null;
+
+  return `
+    <div class="card results-card">
+      <div class="results-icon">${icon}</div>
+      <h2 style="font-family:'Fredoka One',cursive;margin-bottom:5px;">${title}</h2>
+      <div class="results-score">${score} pts</div>
+      <div class="results-msg">${msg}</div>
+      <div class="results-stats">
+        <div class="stat-box">
+          <div class="num">${correct}</div>
+          <div class="label">Correctas</div>
+        </div>
+        <div class="stat-box">
+          <div class="num">${totalQ - correct}</div>
+          <div class="label">Incorrectas</div>
+        </div>
+        <div class="stat-box">
+          <div class="num">${pct}%</div>
+          <div class="label">Rendimiento</div>
+        </div>
+      </div>
+      <div style="margin:15px 0;padding:15px;background:#f8f9fa;border-radius:15px;">
+        <p style="font-weight:700;color:var(--primary);">⭐ Puntaje Total Acumulado: ${state.totalScore}</p>
+        <p style="font-size:0.85rem;color:#888;margin-top:5px;">Modo ${state.currentModeIndex + 1} de 4 completado</p>
+      </div>
+      <div style="text-align:center;">
+        <div style="margin-bottom:10px;padding:6px 14px;background:rgba(46,204,113,0.1);border-radius:10px;font-size:0.85rem;color:#555;">
+          ⏱️ Avanza automaticamente en <span id="resultsCountdown" style="font-weight:800;color:var(--green);font-size:1rem;">15</span> segundos...
+        </div>
+        <button class="btn btn-green" onclick="advanceToNextMode()" style="padding:14px 40px;font-size:1.1rem;">
+          ${nextModeInfo ? nextModeInfo.icon + ' Continuar: ' + nextModeInfo.name + ' →' : '📋 Ver Mi Reporte MEP 🏆'}
+        </button>
+      </div>
+    </div>
+    <div class="confetti-container" id="confetti"></div>
+  `;
+}
+
+function replay() {
+  switch(state.resultMode) {
+    case 'trivia': startTrivia(); break;
+    case 'match': startMatch(); break;
+    case 'cancer': startCancer(); break;
+  }
+}
+
+function showConfetti() {
+  setTimeout(() => {
+    const container = document.getElementById('confetti');
+    if (!container) return;
+    const colors = ['#6C63FF','#FF6B6B','#4ECDC4','#FFE66D','#2ECC71','#F39C12'];
+    for (let i = 0; i < 50; i++) {
+      const piece = document.createElement('div');
+      piece.className = 'confetti-piece';
+      piece.style.left = Math.random() * 100 + '%';
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+      piece.style.animationDelay = Math.random() * 2 + 's';
+      piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+      piece.style.width = (Math.random() * 8 + 5) + 'px';
+      piece.style.height = (Math.random() * 8 + 5) + 'px';
+      container.appendChild(piece);
+    }
+    setTimeout(() => { if (container) container.innerHTML = ''; }, 4000);
+  }, 100);
+}
+
+function goMenu() {
+  clearInterval(state.timerInterval);
+  state.screen = 'menu';
+  render();
+}
+
+// ========== MEP RUBRIC EVALUATION - 3 SABERES ==========
+// Basado en: Rubrica integrada para la triada (MEP 2026)
+// Escala: 1. Inicial, 2. Basico, 3. Aceptable, 4. Sobresaliente
+
+function getRubricLevel(percentage) {
+  if (percentage >= 76) return { level: 4, name: 'Sobresaliente', color: '#2ecc71', icon: '🌟' };
+  if (percentage >= 51) return { level: 3, name: 'Aceptable', color: '#3498db', icon: '👏' };
+  if (percentage >= 26) return { level: 2, name: 'Basico', color: '#f39c12', icon: '📖' };
+  return { level: 1, name: 'Inicial', color: '#e74c3c', icon: '🔰' };
+}
+
+// Descriptores oficiales MEP 2026 - Rubrica integrada para la triada
+const saberDescriptors = {
+  saberConocer: {
+    4: 'Explica con precision, usa vocabulario tecnico y relaciones causales y sistemicas.',
+    3: 'Explica adecuadamente con pocos detalles faltantes; usa terminos basicos correctamente.',
+    2: 'Explica parcialmente; presenta errores o confusiones conceptuales.',
+    1: 'No logra explicar el fenomeno o mantiene ideas previas no revisadas.'
+  },
+  saberHacer: {
+    4: 'Disena/ejecuta procedimientos rigurosos; analiza datos con fundamentos; triangula fuentes confiables.',
+    3: 'Ejecuta procedimientos correctos; organiza y representa datos; usa fuentes pertinentes.',
+    2: 'Requiere guia frecuente; registros incompletos o poco precisos.',
+    1: 'No sigue procedimientos; no registra informacion util.'
+  },
+  saberSer: {
+    4: 'Argumenta con evidencia, coopera activamente, respeta diversidad de ideas, propone mejoras.',
+    3: 'Participa y argumenta de forma simple; respeta normas y roles.',
+    2: 'Participacion limitada; bajo compromiso colaborativo.',
+    1: 'Dificultad para colaborar; no respeta acuerdos; evita participar.'
+  }
+};
+
+function calculate3Saberes() {
+  // SABER = Trivia (pure knowledge recall)
+  const triviaTopics = state.topicStats;
+  let saberCorrect = 0, saberTotal = 0;
+  // Only count trivia questions (organelos/ciclo/cancer from trivia)
+  // We track trivia separately
+  if (state.triviaQuestions && state.triviaQuestions.length > 0) {
+    saberTotal = state.triviaQuestions.length;
+    saberCorrect = state.triviaCorrect;
+  }
+  const saberPct = saberTotal > 0 ? Math.round((saberCorrect / saberTotal) * 100) : 0;
+
+  // SABER HACER = Match + Cycle (application: classifying, ordering, relating)
+  const matchTotal = organelleMatchData.reduce((sum, r) => sum + r.pairs.length, 0);
+  const matchCorrect = state.matchCorrect;
+  // Cycle: phase1 order (8 positions) + phase2 characteristics (16 options)
+  let cyclePhase1Correct = 0;
+  if (state.placedPhases) {
+    state.placedPhases.forEach((phaseIdx, slotIdx) => {
+      if (phaseIdx === slotIdx) cyclePhase1Correct++;
+    });
+  }
+  const hacerCorrect = matchCorrect + cyclePhase1Correct + state.charCorrect;
+  const hacerTotal = matchTotal + 8 + 16; // match pairs + 8 order positions + 16 char options
+  const hacerPct = hacerTotal > 0 ? Math.round((hacerCorrect / hacerTotal) * 100) : 0;
+
+  // SABER SER = Cancer Detective (social awareness, prevention, responsibility)
+  const serTotal = state.cancerScenarios ? state.cancerScenarios.length : 6;
+  const serCorrect = state.cancerCorrect;
+  const serPct = serTotal > 0 ? Math.round((serCorrect / serTotal) * 100) : 0;
+
+  return {
+    saberConocer: { pct: saberPct, correct: saberCorrect, total: saberTotal, rubric: getRubricLevel(saberPct) },
+    saberHacer: { pct: hacerPct, correct: hacerCorrect, total: hacerTotal, rubric: getRubricLevel(hacerPct) },
+    saberSer: { pct: serPct, correct: serCorrect, total: serTotal, rubric: getRubricLevel(serPct) }
+  };
+}
+
+function calculateCotidianoGrade(saberes) {
+  // Ponderacion: SABER CONOCER 40%, SABER HACER 40%, SABER SER 20%
+  const grade = (saberes.saberConocer.pct * 0.4) + (saberes.saberHacer.pct * 0.4) + (saberes.saberSer.pct * 0.2);
+  return Math.round(grade);
+}
+
+// ========== STUDENT RECORDS (localStorage) ==========
+function getStoredResults() {
+  try {
+    const data = localStorage.getItem('bioquest8_results');
+    return data ? JSON.parse(data) : [];
+  } catch(e) { return []; }
+}
+
+function saveStudentResult(saberes) {
+  const results = getStoredResults();
+  const date = new Date();
+  results.push({
+    seccion: state.studentSeccion,
+    nombre: state.studentNombre,
+    apellido1: state.studentApellido1,
+    apellido2: state.studentApellido2,
+    nombreCompleto: state.studentName,
+    telEstudiante: state.studentTelEst,
+    telEncargado: state.studentTelEnc,
+    fecha: date.toLocaleDateString('es-CR', { day:'numeric', month:'long', year:'numeric' }),
+    fechaISO: date.toISOString(),
+    puntajeTotal: state.totalScore,
+    saberConocer: { pct: saberes.saberConocer.pct, nivel: saberes.saberConocer.rubric.name, level: saberes.saberConocer.rubric.level, correct: saberes.saberConocer.correct, total: saberes.saberConocer.total },
+    saberHacer: { pct: saberes.saberHacer.pct, nivel: saberes.saberHacer.rubric.name, level: saberes.saberHacer.rubric.level, correct: saberes.saberHacer.correct, total: saberes.saberHacer.total },
+    saberSer: { pct: saberes.saberSer.pct, nivel: saberes.saberSer.rubric.name, level: saberes.saberSer.rubric.level, correct: saberes.saberSer.correct, total: saberes.saberSer.total },
+    cotidiano: calculateCotidianoGrade(saberes)
+  });
+  try { localStorage.setItem('bioquest8_results', JSON.stringify(results)); } catch(e) {}
+  return results;
+}
+
+// ========== EXCEL GENERATION ==========
+function downloadExcel() {
+  const results = getStoredResults();
+  if (results.length === 0) { alert('No hay resultados guardados aun.'); return; }
+
+  const headers = [
+    'Seccion', 'Apellido 1', 'Apellido 2', 'Nombre', 'Tel. Estudiante', 'Tel. Encargado', 'Fecha',
+    'SABER CONOCER - Nivel', 'SABER CONOCER - Escala (1-4)', 'SABER CONOCER - %',
+    'SABER HACER - Nivel', 'SABER HACER - Escala (1-4)', 'SABER HACER - %',
+    'SABER SER - Nivel', 'SABER SER - Escala (1-4)', 'SABER SER - %',
+    'Nota Cotidiano Sugerida', 'Puntaje Juego'
+  ];
+
+  const rows = results.map(r => [
+    r.seccion || '', r.apellido1 || '', r.apellido2 || '', r.nombre || r.nombreCompleto || '', r.telEstudiante || '', r.telEncargado || '', r.fecha,
+    r.saberConocer.nivel, r.saberConocer.level, r.saberConocer.pct,
+    r.saberHacer.nivel, r.saberHacer.level, r.saberHacer.pct,
+    r.saberSer.nivel, r.saberSer.level, r.saberSer.pct,
+    r.cotidiano, r.puntajeTotal
+  ]);
+
+  const wsData = [headers, ...rows];
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+  // Column widths
+  ws['!cols'] = [
+    {wch:8}, {wch:18}, {wch:18}, {wch:15}, {wch:14}, {wch:14}, {wch:18},
+    {wch:18}, {wch:10}, {wch:8},
+    {wch:16}, {wch:10}, {wch:8},
+    {wch:14}, {wch:10}, {wch:8},
+    {wch:18}, {wch:12}
+  ];
+
+  XLSX.utils.book_append_sheet(wb, ws, 'Evaluacion MEP');
+
+  // Add summary sheet
+  const summaryHeaders = ['Resumen General', ''];
+  const summaryData = [
+    summaryHeaders,
+    ['Materia', 'Ciencias 8° - Biologia Celular'],
+    ['Unidad', '1. Celula, Ciclo Celular y Cancer'],
+    ['Total Estudiantes', results.length],
+    ['Fecha de Descarga', new Date().toLocaleDateString('es-CR')],
+    [],
+    ['Distribucion SABER CONOCER', ''],
+    ['1. Inicial', results.filter(r => r.saberConocer.nivel === 'Inicial').length],
+    ['2. Basico', results.filter(r => r.saberConocer.nivel === 'Basico').length],
+    ['3. Aceptable', results.filter(r => r.saberConocer.nivel === 'Aceptable').length],
+    ['4. Sobresaliente', results.filter(r => r.saberConocer.nivel === 'Sobresaliente').length],
+    [],
+    ['Distribucion SABER HACER', ''],
+    ['1. Inicial', results.filter(r => r.saberHacer.nivel === 'Inicial').length],
+    ['2. Basico', results.filter(r => r.saberHacer.nivel === 'Basico').length],
+    ['3. Aceptable', results.filter(r => r.saberHacer.nivel === 'Aceptable').length],
+    ['4. Sobresaliente', results.filter(r => r.saberHacer.nivel === 'Sobresaliente').length],
+    [],
+    ['Distribucion SABER SER', ''],
+    ['1. Inicial', results.filter(r => r.saberSer.nivel === 'Inicial').length],
+    ['2. Basico', results.filter(r => r.saberSer.nivel === 'Basico').length],
+    ['3. Aceptable', results.filter(r => r.saberSer.nivel === 'Aceptable').length],
+    ['4. Sobresaliente', results.filter(r => r.saberSer.nivel === 'Sobresaliente').length],
+  ];
+  const ws2 = XLSX.utils.aoa_to_sheet(summaryData);
+  ws2['!cols'] = [{wch:25}, {wch:30}];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Resumen');
+
+  XLSX.writeFile(wb, 'BioQuest8_Evaluacion_MEP.xlsx');
+}
+
+function clearAllResults() {
+  if (confirm('Esto borrara TODOS los resultados guardados de todos los estudiantes. Esta seguro?')) {
+    localStorage.removeItem('bioquest8_results');
+    alert('Resultados borrados exitosamente.');
+  }
+}
+
+function sendByEmail() {
+  const saberes = calculate3Saberes();
+  const cotidiano = calculateCotidianoGrade(saberes);
+  const fecha = new Date().toLocaleDateString('es-CR');
+
+  const subject = encodeURIComponent('BioQuest 8° - Resultado de ' + state.studentName);
+  const body = encodeURIComponent(
+    'Estudiante: ' + state.studentName + '\n' +
+    'Seccion: ' + state.studentSeccion + '\n' +
+    'Tel. Estudiante: ' + (state.studentTelEst || 'N/A') + '\n' +
+    'Tel. Encargado: ' + (state.studentTelEnc || 'N/A') + '\n' +
+    'Fecha: ' + fecha + '\n\n' +
+    '--- RESULTADOS ---\n\n' +
+    'SABER CONOCER: Nivel ' + saberes.saberConocer.rubric.level + ' (' + saberes.saberConocer.rubric.name + ') - ' + saberes.saberConocer.pct + '%\n' +
+    'SABER HACER: Nivel ' + saberes.saberHacer.rubric.level + ' (' + saberes.saberHacer.rubric.name + ') - ' + saberes.saberHacer.pct + '%\n' +
+    'SABER SER: Nivel ' + saberes.saberSer.rubric.level + ' (' + saberes.saberSer.rubric.name + ') - ' + saberes.saberSer.pct + '%\n\n' +
+    'NOTA COTIDIANO: ' + cotidiano.toFixed(1) + '\n' +
+    'Puntaje Total: ' + state.totalScore + ' pts\n\n' +
+    '(Descargue el Excel adjunto para datos completos)'
+  );
+
+  window.open('mailto:lrluisge@gmail.com?subject=' + subject + '&body=' + body, '_blank');
+  alert('Se abrio tu correo. Recorda adjuntar el Excel antes de enviar!');
+}
+
+// Google Sheets integration via Google Form
+// To activate: create a Google Form with the fields below,
+// then replace GOOGLE_FORM_ID and ENTRY_IDs with real values.
+const GOOGLE_FORM_CONFIG = {
+  formId: '1FAIpQLScyj1qNeqn4Bw7FaQ2rLn_hE9UhBYWm8lE4pYDhMJRJRvGD6A',
+  entries: {
+    seccion: 'entry.1789719985',
+    apellido1: 'entry.545721995',
+    apellido2: 'entry.629436908',
+    nombre: 'entry.776533682',
+    telEstudiante: 'entry.936113895',
+    telEncargado: 'entry.1896839188',
+    fecha: 'entry.76582295',
+    saberConocerNivel: 'entry.1175146561',
+    saberConocerPct: 'entry.826683153',
+    saberHacerNivel: 'entry.1827868339',
+    saberHacerPct: 'entry.988889949',
+    saberSerNivel: 'entry.803582685',
+    saberSerPct: 'entry.656575777',
+    cotidiano: 'entry.962688662',
+    puntaje: 'entry.382442892'
+  }
+};
+
+let autoSendInterval = null;
+let alreadySent = false;
+
+function startAutoSend() {
+  if (alreadySent) return;
+  let countdown = 10;
+  clearInterval(autoSendInterval);
+  autoSendInterval = setInterval(() => {
+    countdown--;
+    const el = document.getElementById('autoSendCountdown');
+    if (el) el.textContent = countdown;
+    if (countdown <= 0) {
+      clearInterval(autoSendInterval);
+      sendToGoogleSheets();
+    }
+  }, 1000);
+}
+
+function sendToGoogleSheets() {
+  clearInterval(autoSendInterval);
+  if (alreadySent) {
+    alert('Los resultados ya fueron enviados al profesor.');
+    return;
+  }
+  alreadySent = true;
+  if (!GOOGLE_FORM_CONFIG.formId) {
+    alert('Google Sheets no esta configurado todavia. Contacte al profesor.');
+    return;
+  }
+
+  const saberes = calculate3Saberes();
+  const cotidiano = calculateCotidianoGrade(saberes);
+  const fecha = new Date().toLocaleDateString('es-CR');
+  const e = GOOGLE_FORM_CONFIG.entries;
+
+  const formData = new URLSearchParams();
+  formData.append(e.seccion, state.studentSeccion);
+  formData.append(e.apellido1, state.studentApellido1);
+  formData.append(e.apellido2, state.studentApellido2);
+  formData.append(e.nombre, state.studentNombre);
+  formData.append(e.telEstudiante, state.studentTelEst || '');
+  formData.append(e.telEncargado, state.studentTelEnc || '');
+  formData.append(e.fecha, fecha);
+  formData.append(e.saberConocerNivel, saberes.saberConocer.rubric.level);
+  formData.append(e.saberConocerPct, saberes.saberConocer.pct);
+  formData.append(e.saberHacerNivel, saberes.saberHacer.rubric.level);
+  formData.append(e.saberHacerPct, saberes.saberHacer.pct);
+  formData.append(e.saberSerNivel, saberes.saberSer.rubric.level);
+  formData.append(e.saberSerPct, saberes.saberSer.pct);
+  formData.append(e.cotidiano, cotidiano.toFixed(1));
+  formData.append(e.puntaje, state.totalScore);
+
+  // Build pre-filled Google Form URL and auto-submit
+  const baseUrl = 'https://docs.google.com/forms/d/e/' + GOOGLE_FORM_CONFIG.formId + '/formResponse?';
+  const params = formData.toString();
+  const fullUrl = baseUrl + params + '&submit=Submit';
+
+  // Open in new tab - Google will process the submission
+  const submitWindow = window.open(fullUrl, '_blank');
+
+  // Update UI to show sent status
+  const notice = document.getElementById('autoSendNotice');
+  if (notice) {
+    notice.style.background = '#e8f5e9';
+    notice.style.borderColor = '#4caf50';
+    notice.innerHTML = '<p style="font-weight:700;color:#2e7d32;font-size:0.9rem;">✅ Resultados enviados al profesor exitosamente!</p>';
+  }
+  const btnManual = document.getElementById('btnSendManual');
+  if (btnManual) {
+    btnManual.textContent = '✅ Enviado';
+    btnManual.style.background = '#aaa';
+    btnManual.style.cursor = 'default';
+  }
+
+  if (!submitWindow) {
+    alert('El navegador bloqueo la ventana. Permite ventanas emergentes e intenta de nuevo.');
+    alreadySent = false;
+  }
+}
+
+// ========== REPORT SCREEN ==========
+function renderReport() {
+  const saberes = calculate3Saberes();
+  const cotidiano = calculateCotidianoGrade(saberes);
+
+  // Save this student's result
+  const allResults = saveStudentResult(saberes);
+
+  const date = new Date();
+  const dateStr = date.toLocaleDateString('es-CR', { day:'numeric', month:'long', year:'numeric' });
+
+  const saberDimensions = [
+    { key: 'saberConocer', name: 'SABER CONOCER', subtitle: 'Concepto', icon: '🧠', source: 'Trivia Celular', data: saberes.saberConocer },
+    { key: 'saberHacer', name: 'SABER HACER', subtitle: 'Habilidad cientifica', icon: '🧩', source: 'Conecta Organelos + Ordena el Ciclo', data: saberes.saberHacer },
+    { key: 'saberSer', name: 'SABER SER', subtitle: 'Actitudes / valores', icon: '🏥', source: 'Detective del Cancer', data: saberes.saberSer }
+  ];
+
+  const dimensionsHTML = saberDimensions.map(d => {
+    const r = d.data.rubric;
+    const desc = saberDescriptors[d.key][r.level];
+    return `
+      <div style="background:white;border-radius:15px;padding:18px;margin-bottom:12px;border-left:5px solid ${r.color};box-shadow:0 3px 10px rgba(0,0,0,0.08);">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+          <div>
+            <span style="font-size:1.2rem;">${d.icon}</span>
+            <strong style="font-size:1rem;margin-left:5px;">${d.name}</strong>
+            <div style="font-size:0.75rem;color:#888;margin-top:2px;">${d.subtitle}</div>
+          </div>
+          <span style="background:${r.color};color:white;padding:5px 15px;border-radius:20px;font-weight:700;font-size:0.9rem;">
+            ${r.icon} ${r.level}. ${r.name}
+          </span>
+        </div>
+        <div style="margin-top:10px;">
+          <div style="background:#f0f0f0;border-radius:10px;height:12px;overflow:hidden;">
+            <div style="background:${r.color};height:100%;width:${d.data.pct}%;border-radius:10px;transition:width 1s ease;"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:0.8rem;color:#888;">
+            <span>${d.data.correct}/${d.data.total} correctas</span>
+            <span>${d.data.pct}%</span>
+          </div>
+        </div>
+        <p style="font-size:0.78rem;color:#999;margin-top:5px;">Evaluado en: ${d.source}</p>
+        <p style="font-size:0.82rem;color:#555;margin-top:4px;font-style:italic;">${desc}</p>
+      </div>
+    `;
+  }).join('');
+
+  // Overall rubric from cotidiano grade
+  const overallRubric = getRubricLevel(cotidiano);
+
+  showConfetti();
+
+  return `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;color:white;font-size:0.85rem;flex-wrap:wrap;gap:5px;">
+      <span style="font-weight:700;">👤 ${state.studentName}</span>
+      <span style="background:rgba(255,255,255,0.2);padding:4px 12px;border-radius:15px;">✅ 4/4 Completado</span>
+    </div>
+    <div class="card" style="max-width:600px;margin:10px auto;">
+      <div style="text-align:center;margin-bottom:15px;">
+        <div style="margin-bottom:8px;">${TEACHER_LOGO_MINI}</div>
+        <div style="font-size:2.5rem;">📋</div>
+        <h2 style="font-family:'Fredoka One',cursive;color:var(--primary);">Reporte de Evaluacion MEP</h2>
+        <p style="color:#888;font-size:0.85rem;">Rubrica Integrada: 3 Dimensiones del Saber</p>
+      </div>
+
+      <div style="background:linear-gradient(135deg,#667eea,#764ba2);border-radius:15px;padding:18px;color:white;margin-bottom:15px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+          <div>
+            <div style="font-size:0.8rem;opacity:0.8;">Estudiante</div>
+            <div style="font-size:1.3rem;font-weight:800;">${state.studentName}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:0.8rem;opacity:0.8;">Fecha</div>
+            <div style="font-weight:700;">${dateStr}</div>
+          </div>
+        </div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,0.3);text-align:center;">
+          <div style="font-size:0.8rem;opacity:0.8;">Ciencias 8° | Unidad 1: Celula, Ciclo Celular y Cancer</div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:15px;">
+        <h3 style="font-family:'Fredoka One',cursive;color:var(--dark);font-size:1rem;margin-bottom:12px;">📊 Evaluacion por Dimension</h3>
+        ${dimensionsHTML}
+      </div>
+
+      <div style="background:linear-gradient(135deg,${overallRubric.color}22,${overallRubric.color}11);border:2px solid ${overallRubric.color};border-radius:15px;padding:18px;text-align:center;margin-bottom:15px;">
+        <div style="font-size:0.85rem;color:#666;font-weight:700;">NOTA SUGERIDA COTIDIANO</div>
+        <div style="font-size:2.5rem;font-family:'Fredoka One',cursive;color:${overallRubric.color};margin:8px 0;">${cotidiano}/100</div>
+        <div style="font-size:1rem;font-weight:700;color:${overallRubric.color};">${overallRubric.icon} Nivel General: ${overallRubric.name}</div>
+        <div style="margin-top:10px;display:flex;justify-content:center;gap:12px;font-size:0.75rem;color:#888;">
+          <span>SABER CONOCER 40%</span><span>SABER HACER 40%</span><span>SABER SER 20%</span>
+        </div>
+      </div>
+
+      <div style="background:#f8f9fa;border-radius:12px;padding:12px;font-size:0.75rem;color:#888;margin-bottom:15px;">
+        <p><strong>Nota:</strong> Evaluacion basada en la rubrica integrada para la triada MEP 2026. Escala: 1. Inicial, 2. Basico, 3. Aceptable, 4. Sobresaliente. La nota cotidiano se calcula: SABER CONOCER (40%) + SABER HACER (40%) + SABER SER (20%). El resultado se guarda automaticamente.</p>
+        <p style="margin-top:5px;">Puntaje total en el juego: ${state.totalScore} pts | Estudiantes registrados: ${allResults.length}</p>
+      </div>
+
+      <div id="autoSendNotice" style="text-align:center;margin-bottom:10px;padding:10px;background:#e8f5e9;border-radius:12px;border:1px solid #a5d6a7;">
+        <p style="font-weight:700;color:#2e7d32;font-size:0.9rem;">📤 Enviando resultados al profesor en <span id="autoSendCountdown">10</span> segundos...</p>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+        <button class="btn btn-primary" onclick="sendToGoogleSheets()" id="btnSendManual" style="padding:12px 25px;">📤 Enviar Ahora</button>
+        <button class="btn btn-accent" onclick="printReport()">🖨️ Imprimir</button>
+        <button class="btn btn-green" onclick="downloadExcel()">📊 Descargar Excel</button>
+        <button class="btn btn-secondary" onclick="resetGame()">🔄 Nuevo Estudiante</button>
+      </div>
+
+      <div style="margin-top:15px;padding:12px;background:#fff3e0;border-radius:12px;border:1px solid #ffe0b2;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+          <div>
+            <p style="font-weight:700;color:var(--orange);font-size:0.85rem;">${TEACHER_LOGO_MINI} Zona del Docente</p>
+            <p style="font-size:0.75rem;color:#888;">${allResults.length} estudiante(s) registrado(s) en este dispositivo</p>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button onclick="downloadExcel()" style="background:var(--green);color:white;border:none;padding:6px 12px;border-radius:8px;font-size:0.8rem;font-weight:700;cursor:pointer;">📊 Excel Acumulado</button>
+            <button onclick="sendByEmail()" style="background:var(--primary);color:white;border:none;padding:6px 12px;border-radius:8px;font-size:0.8rem;font-weight:700;cursor:pointer;">📧 Enviar por Correo</button>
+            <button onclick="clearAllResults()" style="background:#e74c3c;color:white;border:none;padding:6px 12px;border-radius:8px;font-size:0.8rem;font-weight:700;cursor:pointer;">🗑️ Limpiar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="confetti-container" id="confetti"></div>
+  `;
+}
+
+function printReport() {
+  window.print();
+}
+
+function resetGame() {
+  alreadySent = false;
+  clearInterval(autoSendInterval);
+  state.studentName = '';
+  state.studentNombre = '';
+  state.studentApellido1 = '';
+  state.studentApellido2 = '';
+  state.studentTelEst = '';
+  state.studentTelEnc = '';
+  state.studentSeccion = '';
+  state.totalScore = 0;
+  state.currentModeIndex = 0;
+  state.triviaScore = 0; state.matchScore = 0; state.cycleScore = 0; state.cancerScore = 0;
+  state.modesCompleted = { trivia: false, match: false, cycle: false, cancer: false };
+  state.topicStats = { organelos: { correct: 0, total: 0 }, ciclo: { correct: 0, total: 0 }, cancer: { correct: 0, total: 0 } };
+  state.screen = 'register';
+  render();
+}
+
+// Initialize
+render();
+</script>
+</body>
+</html>
